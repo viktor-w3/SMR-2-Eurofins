@@ -21,7 +21,7 @@ def send_urscript_command(command, robot_ip="192.168.0.43", port=30002):
 
 # Functie om grid-positie naar coördinaten te converteren
 def grid_to_coordinates(rij, kolom):
-    x_base, y_base, z_base = 0.427, 0.123, -0.039  # Basispunt van het grid
+    x_base, y_base, z_base = 0.654, 0.140, -0.039  # Basispunt van het grid
     z_step, y_step = 0.175, 0.224  # Afstanden tussen gridpunten
     #van het midde kan die 85mm omhoog moet je onder blijven 
     x = x_base
@@ -33,8 +33,8 @@ def grid_to_coordinates(rij, kolom):
 def move_robot(coordinates, message=""):
     x, y, z = coordinates
     orientation = [-2.2, 2.2, 0.027]
-    speed = 0.8
-    acceleration = 0.4
+    speed = 0.4
+    acceleration = 0.2
     command = (
         f"movel(p[{x}, {y}, {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
@@ -60,9 +60,9 @@ def langzaam_naar_grid(coordinates, message=""):
 
 def langzaam_uit_grid(coordinates, message=""):
     x,y,z = coordinates
-    orientation = [2.19, -2.2, -0.04]
-    speed = 0.8
-    acceleration = 0.4
+    orientation = [-2.17, 2.1, -0.15]
+    speed = 0.2
+    acceleration = 0.1
     command = (
         f"movel(p[0.270,{y} , {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
@@ -70,7 +70,8 @@ def langzaam_uit_grid(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(5)
+    time.sleep(15)
+
 
 def move_robot_Verf(message=""):
     verf_punt = [0.300, 0.550, 0.500]
@@ -103,6 +104,24 @@ def move_robot_Photo(message=""):
     print(f"Robot antwoord: {response}")
     time.sleep(5)
 
+def pick_up(coordinates, message=""):
+    x, y, z = coordinates
+    x_pickup = x + 0.04
+    y_pickup = y -0.002
+    z_pickup = z + 0.03
+    orientation = [-2.2, 2.4, 0.027]
+    speed = 0.1
+    acceleration = 0.02
+    command = (
+        f"movel(p[{x_pickup}, {y_pickup}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(15)
+
+
 # Automatisch verwerkingssysteem
 def process_samples():
     while True:  # Herhaal het proces continu
@@ -119,6 +138,7 @@ def process_samples():
                     langzaam_naar_grid(coordinates, f"Langzaam naar {sample} in grid")
                     move_robot(coordinates, f"Beweging om {sample} op te pakken")
                     grid[rij][kolom] = None
+                    pick_up(coordinates, f"Pakken van {sample}") 
                     langzaam_uit_grid(coordinates, f"Langzaam uit {sample} in grid")
                     move_robot_Verf(f"Beweging om {sample} te verven")
                     langzaam_uit_grid(coordinates, f"Langzaam uit {sample} in grid")
