@@ -21,8 +21,8 @@ def send_urscript_command(command, robot_ip="192.168.0.43", port=30002):
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Functie om grid-positie naar coördinaten te converteren
 def grid_to_coordinates(rij, kolom):
-    x_base, y_base, z_base = 0.554, 0.140, -0.039  # Basispunt van het grid
-    z_step, y_step = 0.175, 0.224  # Afstanden tussen gridpunten
+    x_base, y_base, z_base = 0.554, 0.124, -0.039  # Basispunt van het grid
+    z_step, y_step = 0.175, 0.221  # Afstanden tussen gridpunten
     #van het midde kan die 85mm omhoog moet je onder blijven 
     x = x_base
     y = y_base - (kolom * y_step)
@@ -37,6 +37,22 @@ def move_robot(coordinates, message=""):
     acceleration = 0.4
     command = (
         f"movel(p[{x}, {y}, {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(2)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Functie om de robot te bewegen voor weer in de grid
+def move_robot_terug(coordinates, message=""):
+    x, y, z = coordinates
+    z_terug = z + 0.03
+    orientation = [-2.2, 2.2, 0.027]
+    speed = 0.6
+    acceleration = 0.4
+    command = (
+        f"movel(p[{x}, {y}, {z_terug}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
     )
     print(f"{message}: {command.strip()}")
@@ -62,9 +78,9 @@ def langzaam_naar_grid(coordinates, message=""):
 # de grijper van de robot veranderen voor een goede beet 666 
 def pick_up(coordinates, message=""):
     x, y, z = coordinates
-    x_pickup = x + 0.116
+    x_pickup = x + 0.214
     y_pickup = y 
-    z_pickup = z + 0.03
+    z_pickup = z + 0.016
     orientation = [2.15, -2.05, -0.29]
     speed = 0.6
     acceleration = 0.4
@@ -80,11 +96,11 @@ def pick_up(coordinates, message=""):
 #omhoog met de sample voor het er uit halen
 def er_uit_halen_van_kast(coordinates, message=""):
     x, y, z = coordinates
-    x_pickup = x + 0.116 
+    x_pickup = x + 0.210
     z_pickup = z 
     orientation = [-2.2, 2.15, -0.25]
-    speed = 0.6
-    acceleration = 0.4
+    speed = 0.06
+    acceleration = 0.04
     command = (
         f"movel(p[{x_pickup}, {y}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
@@ -92,15 +108,15 @@ def er_uit_halen_van_kast(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(20)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 def langzaam_uit_grid(coordinates, message=""):
     x,y,z = coordinates
-    orientation = [-2.17, 2.1, -0.15]
+    orientation = [-2.1, 2.1, -0.15]
     speed = 0.6
     acceleration = 0.4
     command = (
-        f"movel(p[0.270,{y} , {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"movel(p[0.260,{y} , {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
     )
     print(f"{message}: {command.strip()}")
@@ -129,9 +145,9 @@ def move_robot_Verf(message=""):
 # terug leggen van de sample 
 def het_in_de_kast_leggen(coordinates, message=""):
     x, y, z = coordinates
-    x_pickup = x + 0.116 
+    x_pickup = x + 0.210 
     z_pickup = z + 0.002
-    orientation = [-2.2, 2.15, -0.25]
+    orientation = [-2.16, 2.17, -0.14]
     speed = 0.6
     acceleration = 0.4
     command = (
@@ -146,10 +162,10 @@ def het_in_de_kast_leggen(coordinates, message=""):
 #grijper er uit halen
 def terug_de_grijper_er_uit(coordinates, message=""):
     x, y, z = coordinates
-    x_pickup = x + 0.116
+    x_pickup = x + 0.210
     y_pickup = y 
     z_pickup = z + 0.03
-    orientation = [2.15, -2.05, -0.29]
+    orientation = [2.1, -2.01, -0.36]
     speed = 0.6
     acceleration = 0.4
     command = (
@@ -205,7 +221,7 @@ def process_samples():
                     move_robot_Verf(f"6. Beweging om {sample} te verven")
                     #bewegingen voor het verven 
                     langzaam_uit_grid(coordinates, f"7. Langzaam uit {sample} in grid")
-                    move_robot(coordinates, f"8. Beweging om {sample} terug te leggen")
+                    move_robot_terug(coordinates, f"8. Beweging om {sample} terug te leggen")
                     het_in_de_kast_leggen(coordinates, f"9. Beweging om {sample} terug te leggen")
                     terug_de_grijper_er_uit(coordinates,f"10. Beweging om grijper van {sample} weg te halen")
                     langzaam_uit_grid(coordinates, f"11. Langzaam uit {sample} in grid")
