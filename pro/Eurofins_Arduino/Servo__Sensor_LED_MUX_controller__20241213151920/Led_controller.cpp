@@ -2,8 +2,8 @@
 
 CRGB leds[NUM_STRIPS][MAX_NUM_LEDS];  // Array to hold LED data for each strip, define MAX_NUM_LEDS based on the largest strip
 
-int dataPins[NUM_STRIPS] = {9, 10, 11};  // Adjust the data pins according to your setup
-int numLeds[NUM_STRIPS] = {10, 10, 9};  // Example: 10 LEDs on strip 1, 10 on strip 2, 9 on strip 3
+int dataPins[NUM_STRIPS] = {9};  // Adjust the data pins according to your setup
+int numLeds[NUM_STRIPS] = {30};  // Example: 10 LEDs on strip 1, 10 on strip 2, 9 on strip 3
 
 void initialize_leds() {
   // Initialize each LED strip with its corresponding data pin
@@ -57,25 +57,28 @@ void set_led(int stripIndex, int ledIndex, CRGB color) {
 void load_bar(CRGB color, unsigned long duration, int stripIndex) {
   if (stripIndex < 0 || stripIndex >= NUM_STRIPS) {
     Serial.println("Invalid strip index!");
-    return;  // Exit the function if the strip index is invalid
+    return;
   }
 
-  unsigned long startTime = millis();
-  unsigned long previousTime = 0;
-  int numLedsToLight = 0;
+  int totalLeds = numLeds[stripIndex];       // Number of LEDs in the strip
+  unsigned long interval = duration / totalLeds;  // Time interval for each LED to light up
 
-  while (millis() - startTime < duration) {
-    unsigned long currentTime = millis();
-    if (currentTime - previousTime >= 10) {  
-      previousTime = currentTime;
-      numLedsToLight = map(millis() - startTime, 0, duration, 0, numLeds[stripIndex]);
-      for (int i = 0; i < numLeds[stripIndex]; i++) {
-        leds[stripIndex][i] = (i < numLedsToLight) ? color : CRGB::Black;
-      }
-      FastLED.show();
-    }
+  for (int i = 0; i < totalLeds; i++) {
+    leds[stripIndex][i] = color;             // Set LED to the specified color
+    FastLED.show();
+    delay(interval);                        // Wait for the calculated interval
   }
 
+  // Turn off LEDs after the load bar completes
+  for (int i = 0; i < totalLeds; i++) {
+    leds[stripIndex][i] = CRGB::Black;
+  }
+  FastLED.show();
+
+  Serial.println("done"); // Notify completion
+}
+
+/*
   // Optional: Add a blinking effect after the loading bar is complete
   unsigned long blinkStartTime = millis();
   unsigned long blinkDuration = 500;
@@ -94,4 +97,5 @@ void load_bar(CRGB color, unsigned long duration, int stripIndex) {
     }
   }
 }
+*/
 
