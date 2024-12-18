@@ -5,6 +5,7 @@ CRGB leds[NUM_STRIPS][MAX_NUM_LEDS];  // Array to hold LED data for each strip, 
 int dataPins[NUM_STRIPS] = {9};  // Adjust the data pins according to your setup
 int numLeds[NUM_STRIPS] = {30};  // Example: 10 LEDs on strip 1, 10 on strip 2, 9 on strip 3
 
+/* Initialization (Delfault settings) */
 void initialize_leds() {
   // Initialize each LED strip with its corresponding data pin
   for (int i = 0; i < NUM_STRIPS; i++) {
@@ -24,7 +25,7 @@ void deinitialize_leds() {
   }
 }
 */
-
+/* All LED control */
 void set_all_leds(CRGB color) {
   for (int i = 0; i < NUM_STRIPS; i++) {
     for (int j = 0; j < numLeds[i]; j++) {
@@ -34,6 +35,7 @@ void set_all_leds(CRGB color) {
   FastLED.show();
 }
 
+/* Strip control */
 void set_strip_leds(int stripIndex, CRGB color) {
   if (stripIndex >= 0 && stripIndex < NUM_STRIPS) {
     for (int i = 0; i < numLeds[stripIndex]; i++) {
@@ -45,6 +47,7 @@ void set_strip_leds(int stripIndex, CRGB color) {
   }
 }
 
+/*Single LED control */
 void set_led(int stripIndex, int ledIndex, CRGB color) {
   if (stripIndex >= 0 && stripIndex < NUM_STRIPS && ledIndex >= 0 && ledIndex < numLeds[stripIndex]) {
     leds[stripIndex][ledIndex] = color;
@@ -54,48 +57,109 @@ void set_led(int stripIndex, int ledIndex, CRGB color) {
   }
 }
 
-void load_bar(CRGB color, unsigned long duration, int stripIndex) {
+/* LED group control */
+void set_led_range(int stripIndex, int startLed, int endLed, CRGB color) {
+    if (stripIndex < 0 || stripIndex >= NUM_STRIPS) {
+        Serial.println("Invalid strip index!");
+        return;
+    }
+    if (startLed < 0 || endLed >= numLeds[stripIndex] || startLed > endLed) {
+        Serial.println("Invalid LED range!");
+        return;
+    }
+
+    for (int i = startLed; i <= endLed; i++) {
+        leds[stripIndex][i] = color;  // Stel de kleur in voor elk LED in het bereik
+    }
+    FastLED.show();  // Update de LEDs om de wijzigingen door te voeren
+    Serial.println("done");  // Bevestig de opdracht
+}
+
+/* Loadbar control */
+void load_bar_range(CRGB color, unsigned long duration, int stripIndex, int startIndex, int endIndex) {
   if (stripIndex < 0 || stripIndex >= NUM_STRIPS) {
     Serial.println("Invalid strip index!");
     return;
   }
 
-  int totalLeds = numLeds[stripIndex];       // Number of LEDs in the strip
-  unsigned long interval = duration / totalLeds;  // Time interval for each LED to light up
+  int totalLeds = endIndex - startIndex + 1;
+  unsigned long interval = duration / totalLeds;
 
-  for (int i = 0; i < totalLeds; i++) {
-    leds[stripIndex][i] = color;             // Set LED to the specified color
+  for (int i = startIndex; i <= endIndex && i < numLeds[stripIndex]; i++) {
+    leds[stripIndex][i] = color;
     FastLED.show();
-    delay(interval);                        // Wait for the calculated interval
+    delay(interval);
   }
 
   // Turn off LEDs after the load bar completes
-  for (int i = 0; i < totalLeds; i++) {
+  for (int i = startIndex; i <= endIndex && i < numLeds[stripIndex]; i++) {
     leds[stripIndex][i] = CRGB::Black;
   }
   FastLED.show();
-
-  Serial.println("done"); // Notify completion
+  Serial.println("done");
 }
 
-/*
-  // Optional: Add a blinking effect after the loading bar is complete
-  unsigned long blinkStartTime = millis();
-  unsigned long blinkDuration = 500;
-  unsigned long lastBlinkTime = millis();
-  bool ledState = false;
+/* Blink functions */
 
-  while (millis() - blinkStartTime < blinkDuration) {
-    if (millis() - lastBlinkTime >= 200) {
-      lastBlinkTime = millis();
-      ledState = !ledState;
-      CRGB currentColor = ledState ? color : CRGB::Black; // ? operator replaced if statement for the blinking.
-      for (int i = 0; i < numLeds[stripIndex]; i++) {
-        leds[stripIndex][i] = currentColor;
-      }
-      FastLED.show();
+// Blinking functions for single LEDs, all LEDs, and ranges
+void blink_single_led(int stripIndex, int ledIndex, CRGB color, int speed) {
+    if (stripIndex >= 0 && stripIndex < NUM_STRIPS && ledIndex >= 0 && ledIndex < numLeds[stripIndex]) {
+        leds[stripIndex][ledIndex] = color;
+        FastLED.show();
+        delay(speed);
+        leds[stripIndex][ledIndex] = CRGB::Black;
+        FastLED.show();
+        delay(speed);
     }
-  }
+}
+
+void blink_all_leds_on_strip(int stripIndex, CRGB color, int speed) {
+    if (stripIndex >= 0 && stripIndex < NUM_STRIPS) {
+        for (int i = 0; i < numLeds[stripIndex]; i++) {
+            leds[stripIndex][i] = color;
+        }
+        FastLED.show();
+        delay(speed);
+        for (int i = 0; i < numLeds[stripIndex]; i++) {
+            leds[stripIndex][i] = CRGB::Black;
+        }
+        FastLED.show();
+        delay(speed);
+    }
+}
+
+void blink_led_range(int stripIndex, int startLed, int endLed, CRGB color, int speed) {
+    if (stripIndex >= 0 && stripIndex < NUM_STRIPS && startLed >= 0 && endLed < numLeds[stripIndex]) {
+        for (int i = startLed; i <= endLed; i++) {
+            leds[stripIndex][i] = color;
+        }
+        FastLED.show();
+        delay(speed);
+        for (int i = startLed; i <= endLed; i++) {
+            leds[stripIndex][i] = CRGB::Black;
+        }
+        FastLED.show();
+        delay(speed);
+    }
+}
+/*
+void blink_multiple_strips(int stripIndices[], int numStrips, CRGB color, int speed) {
+    for (int i = 0; i < 10; i++) {  // Blink 10 times (example)
+        for (int s = 0; s < numStrips; s++) {
+            int stripIndex = stripIndices[s];
+            if (stripIndex < 0 || stripIndex >= NUM_STRIPS) continue;
+            fill_solid(leds[stripIndex], numLeds[stripIndex], color);
+        }
+        FastLED.show();
+        delay(speed);
+        for (int s = 0; s < numStrips; s++) {
+            int stripIndex = stripIndices[s];
+            if (stripIndex < 0 || stripIndex >= NUM_STRIPS) continue;
+            fill_solid(leds[stripIndex], numLeds[stripIndex], CRGB::Black);
+        }
+        FastLED.show();
+        delay(speed);
+    }
 }
 */
 
