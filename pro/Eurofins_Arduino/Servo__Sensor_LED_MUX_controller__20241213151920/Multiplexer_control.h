@@ -21,9 +21,9 @@ private:
 };
 
 // External Multiplexer Instances
+extern Multiplexer mux0;
 extern Multiplexer mux1;
 extern Multiplexer mux2;
-extern Multiplexer mux3;
 
 // Function to read the complete Multiplexer and print data for all channels
 void readMultiplexer(Multiplexer& mux);

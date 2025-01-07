@@ -46,7 +46,7 @@ Multiple multiplexers can be connected to the Arduino. At minimum, all multiplex
   readMultiplexer(mux1);              // Read Multiplexer 1
   readMuxChannel(mux1, 2);            // Read channel 2 of Multiplexer 2
 */
-
+//main.ino
 /* Include all function files */
 #include "Servo_controller.h"     // Include the servo controller header
 #include "Led_controller.h"       // Include the LED controller header
@@ -67,6 +67,8 @@ void loop() {
         command.trim();                                // Remove leading/trailing whitespace
         processCommand(command);                      // Process the received command
     }
+    //readMuxChannel(mux2, 2);
+    //readMultiplexer(mux1);
 }
 
 /*List of ALL command calls of Python for the Arduino*/
@@ -90,7 +92,37 @@ void processCommand(String command) {
         servo_off();
         delay(500);              // Allow time for the servo to move
         Serial.println("done");  // Confirm the action is complete
-
+    /*Mux controls*/
+    }else if (command == "read_mux0") {
+        readMultiplexer(mux0); // Read all channels of mux1
+        delay(100);
+        Serial.println("done"); // Confirm the action is complete
+    } else if (command == "read_mux1") {
+        readMultiplexer(mux1); // Read all channels of mux2
+        delay(100);
+        Serial.println("done");
+    } else if (command == "read_mux2") {
+        readMultiplexer(mux2); // Read all channels of mux3
+        delay(100);
+        Serial.println("done");
+    } else if (command.startsWith("read_mux_channel")) {
+        // Example command format: "read_mux_channel 1 2" to read mux2 channel 2
+        int spaceIndex = command.indexOf(' ');
+        int muxIndex = command.substring(spaceIndex + 1, spaceIndex + 2).toInt(); // Mux number
+        int channelIndex = command.substring(spaceIndex + 3).toInt(); // Channel number
+        
+        if (muxIndex == 0) {
+            readMuxChannel(mux0, channelIndex);
+            delay(100);
+        } else if (muxIndex == 1) {
+            readMuxChannel(mux1, channelIndex);
+            delay(100);
+        } else if (muxIndex == 2) {
+            readMuxChannel(mux2, channelIndex);
+            delay(100);
+        }
+        Serial.println("done");
+        
     /*LED Controlls*/
     } else if (command == "initialize_leds") {
         // Initialize the LED strips
@@ -99,12 +131,12 @@ void processCommand(String command) {
         Serial.println("done");  // Confirm the action is complete
 
     } else if (command.startsWith("set_all_leds")) {
-        // Set all LEDs to the specified color
-        String color = command.substring(13); // Get color after the command
-        CRGB ledColor = parseColor(color);
-        set_all_leds(ledColor);
-        delay(100);              // Allow time
-        Serial.println("done");
+      // Extract and log color
+      String color = command.substring(13);
+      Serial.println("Received color: " + color);  // Debugging
+      CRGB ledColor = parseColor(color);
+      set_all_leds(ledColor);
+      Serial.println("done");
 
     } else if (command.startsWith("set_strip_leds")) {
         // Set all LEDs in a specific strip to the specified color

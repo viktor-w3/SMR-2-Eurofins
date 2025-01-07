@@ -1,21 +1,28 @@
+//Led_controller.cpp
 #include "Led_controller.h"
 
 CRGB leds[NUM_STRIPS][MAX_NUM_LEDS];  // Array to hold LED data for each strip, define MAX_NUM_LEDS based on the largest strip
 
-int dataPins[NUM_STRIPS] = {9};  // Adjust the data pins according to your setup
-int numLeds[NUM_STRIPS] = {30};  // Example: 10 LEDs on strip 1, 10 on strip 2, 9 on strip 3
+int dataPins[NUM_STRIPS] = {9 , 10, 11};  // Adjust the data pins according to your setup
+int numLeds[NUM_STRIPS] = {30, 30, 30};  // Example: 10 LEDs on strip 1, 10 on strip 2, 9 on strip 3
 
 /* Initialization (Delfault settings) */
 void initialize_leds() {
-  // Initialize each LED strip with its corresponding data pin
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    // Initialize LEDs on each strip with numLeds[i] as the number of LEDs for that strip
-    FastLED.addLeds<WS2812B, 9, RGB>(leds[i], numLeds[i]); // Use numLeds[i] instead of NUM_LEDS
-  }
+    for (int i = 0; i < NUM_STRIPS; i++) {
+        // Initialize each LED strip separately
+        if (i == 0) {
+            FastLED.addLeds<WS2812B, 9, RGB>(leds[i], numLeds[i]); // Strip 0
+        } else if (i == 1) {
+            FastLED.addLeds<WS2812B, 10, RGB>(leds[i], numLeds[i]); // Strip 1
+        } else if (i == 2) {
+            FastLED.addLeds<WS2812B, 11, RGB>(leds[i], numLeds[i]); // Strip 2
+        }
+    }
+
   set_all_leds(CRGB::Black);
   FastLED.setBrightness(50);
   FastLED.show();
-}
+  }
 
 /*
 Not required, FastLED.h already handles this.
@@ -44,6 +51,7 @@ void set_strip_leds(int stripIndex, CRGB color) {
     FastLED.show();
   } else {
     Serial.println("Invalid strip index!");
+    Serial.println(stripIndex);  
   }
 }
 
@@ -61,10 +69,15 @@ void set_led(int stripIndex, int ledIndex, CRGB color) {
 void set_led_range(int stripIndex, int startLed, int endLed, CRGB color) {
     if (stripIndex < 0 || stripIndex >= NUM_STRIPS) {
         Serial.println("Invalid strip index!");
+        Serial.println(stripIndex);  
         return;
     }
-    if (startLed < 0 || endLed >= numLeds[stripIndex] || startLed > endLed) {
+    if (startLed < 0 || endLed > numLeds[stripIndex] || startLed > endLed) {
         Serial.println("Invalid LED range!");
+        Serial.print("Given start LED: ");
+        Serial.println(startLed);
+        Serial.print("Given end LED: ");
+        Serial.println(endLed);
         return;
     }
 
@@ -79,6 +92,7 @@ void set_led_range(int stripIndex, int startLed, int endLed, CRGB color) {
 void load_bar_range(CRGB color, unsigned long duration, int stripIndex, int startIndex, int endIndex) {
   if (stripIndex < 0 || stripIndex >= NUM_STRIPS) {
     Serial.println("Invalid strip index!");
+    Serial.println(stripIndex);
     return;
   }
 
