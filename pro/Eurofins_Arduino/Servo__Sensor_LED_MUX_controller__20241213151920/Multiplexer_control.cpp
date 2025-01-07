@@ -2,9 +2,9 @@
 
 // Define the Multiplexer instances with their respective pins
 // All multiplexers share the same select pins (A, B, C) connected to Arduino pins 6, 7, and 8
-Multiplexer mux1(6, 7, 8, 2); // Multiplexer 1: Output pin -> Arduino pin 2
-Multiplexer mux2(6, 7, 8, 3); // Multiplexer 2: Output pin -> Arduino pin 3
-Multiplexer mux3(6, 7, 8, 4); // Multiplexer 3: Output pin -> Arduino pin 4
+Multiplexer mux0(6, 7, 8, 2); // Multiplexer 1: Output pin -> Arduino pin 2
+Multiplexer mux1(6, 7, 8, 3); // Multiplexer 2: Output pin -> Arduino pin 3
+Multiplexer mux2(6, 7, 8, 4); // Multiplexer 3: Output pin -> Arduino pin 4
 
 // Constructor: initialize the multiplexer to the pins
 Multiplexer::Multiplexer(int pinA, int pinB, int pinC, int outputPin)
@@ -36,6 +36,7 @@ void readMultiplexer(Multiplexer& mux) {
         Serial.print(channel);
         Serial.print(": ");
         Serial.println(value); // Print the value of the current channel
+        delay(100);
     }
 }
 
@@ -47,4 +48,5 @@ void readMuxChannel(Multiplexer& mux, int channel) {
     Serial.print(channel);
     Serial.print(": ");
     Serial.println(value); // Print the value of the selected channel
+    delay(100);
 }

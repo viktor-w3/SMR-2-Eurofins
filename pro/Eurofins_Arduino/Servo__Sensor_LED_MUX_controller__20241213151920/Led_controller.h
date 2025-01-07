@@ -1,10 +1,15 @@
+//led_controller.h
 #ifndef Led_controller_H
 #define Led_controller_H
 
 #include <FastLED.h>
 
-#define NUM_STRIPS  1        // Number of LED strips (adjust this to match your setup)
+#define NUM_STRIPS  3        // Number of LED strips (adjust this to match your setup)
 #define MAX_NUM_LEDS 30  // Define the maximum number of LEDs in any strip
+
+#define DATA_PIN_1 9
+#define DATA_PIN_2 10
+#define DATA_PIN_3 11
 
 extern int numLeds[NUM_STRIPS]; // Array to store the number of LEDs for each strip
 extern int dataPins[NUM_STRIPS]; // Array of data pins for each strip
