@@ -1,3 +1,4 @@
+from camera_module import run_camera_in_background, CameraHandler
 import time
 import socket
 
@@ -21,20 +22,20 @@ def send_urscript_command(command, robot_ip="192.168.0.43", port=30002):
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Functie om grid-positie naar coördinaten te converteren
 def grid_to_coordinates(rij, kolom):
-    x_base, y_base, z_base = 0.554, 0.124, -0.039  # Basispunt van het grid
-    z_step, y_step = 0.175, 0.221  # Afstanden tussen gridpunten
+    x_base, y_base, z_base = -0.15, -0.203, 0.064  # Basispunt van het grid of -0.150 -0.637
+    z_step, y_step = 0.172, 0.224  # Afstanden tussen gridpunten
     #van het midde kan die 85mm omhoog moet je onder blijven 
     x = x_base
-    y = y_base - (kolom * y_step)
+    y = y_base + (kolom * y_step)
     z = z_base + (rij * z_step)
     return [x, y, z]
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Functie om de robot te bewegen van de grid
 def move_robot(coordinates, message=""):
     x, y, z = coordinates
-    orientation = [-2.2, 2.2, 0.027]
-    speed = 0.6
-    acceleration = 0.4
+    orientation = [2.13, 2.1, 0.318]           #=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    speed = 0.4
+    acceleration = 0.2
     command = (
         f"movel(p[{x}, {y}, {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
@@ -42,15 +43,15 @@ def move_robot(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(20)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Functie om de robot te bewegen voor weer in de grid
 def move_robot_terug(coordinates, message=""):
     x, y, z = coordinates
-    z_terug = z + 0.03
-    orientation = [-2.2, 2.2, 0.027]
-    speed = 0.6
-    acceleration = 0.4
+    z_terug = z + 0.02
+    orientation = [-2.23, -2.16, 0.0079]
+    speed = 0.4
+    acceleration = 0.2
     command = (
         f"movel(p[{x}, {y}, {z_terug}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
@@ -58,51 +59,50 @@ def move_robot_terug(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(40)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+#omhoog met de sample voor het er uit halen
+def orintatie_van_gripper(coordinates, message=""):
+    x, y, z = coordinates
+    x_pickup = x - 0.512
+    z_pickup = z  + 0.004
+    orientation = [-2.14, -2.204, 0.01759]
+    speed = 0.4
+    acceleration = 0.2
+    command = (
+        f"movel(p[{x_pickup}, {y}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(40)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+#omhoog met de sample voor het er uit halen
+def orintatie_van_gripper_er_uit(coordinates, message=""):
+    x, y, z = coordinates
+    x_pickup = x - 0.512
+    z_pickup = z + 0.002
+    orientation = [2.08, 2.25, 0.206]
+    speed = 0.4
+    acceleration = 0.2
+    command = (
+        f"movel(p[{x_pickup}, {y}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(40)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #gaat rustig naar de positie toe
 def langzaam_naar_grid(coordinates, message=""):
     x, y,z = coordinates
-    orientation = [2.19, -2.2, -0.04]
-    speed = 0.6
-    acceleration = 0.4
+    orientation = [-2.23, -2.16, 0.0079]
+    speed = 0.4
+    acceleration = 0.2
     command = (
-        f"movel(p[0.320, {y}, {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
-        f"a={acceleration}, v={speed})\n"
-    )
-    print(f"{message}: {command.strip()}")
-    response = send_urscript_command(command)
-    print(f"Robot antwoord: {response}")
-    time.sleep(2)
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
-# de grijper van de robot veranderen voor een goede beet 666 
-def pick_up(coordinates, message=""):
-    x, y, z = coordinates
-    x_pickup = x + 0.214
-    y_pickup = y 
-    z_pickup = z + 0.016
-    orientation = [2.15, -2.05, -0.29]
-    speed = 0.6
-    acceleration = 0.4
-    command = (
-        f"movel(p[{x_pickup}, {y_pickup}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
-        f"a={acceleration}, v={speed})\n"
-    )
-    print(f"{message}: {command.strip()}")
-    response = send_urscript_command(command)
-    print(f"Robot antwoord: {response}")
-    time.sleep(2)
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
-#omhoog met de sample voor het er uit halen
-def er_uit_halen_van_kast(coordinates, message=""):
-    x, y, z = coordinates
-    x_pickup = x + 0.210
-    z_pickup = z 
-    orientation = [-2.2, 2.15, -0.25]
-    speed = 0.06
-    acceleration = 0.04
-    command = (
-        f"movel(p[{x_pickup}, {y}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"movel(p[-0.1639, {y}, {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
     )
     print(f"{message}: {command.strip()}")
@@ -110,64 +110,15 @@ def er_uit_halen_van_kast(coordinates, message=""):
     print(f"Robot antwoord: {response}")
     time.sleep(20)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
-def langzaam_uit_grid(coordinates, message=""):
-    x,y,z = coordinates
-    orientation = [-2.1, 2.1, -0.15]
-    speed = 0.6
-    acceleration = 0.4
-    command = (
-        f"movel(p[0.260,{y} , {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
-        f"a={acceleration}, v={speed})\n"
-    )
-    print(f"{message}: {command.strip()}")
-    response = send_urscript_command(command)
-    print(f"Robot antwoord: {response}")
-    time.sleep(3)
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
-#gaat voor het verven
-def move_robot_Verf(message=""):
-    verf_punt = [0.300, 0.550, 0.500]
-    orientation = [2.19, -2.2, -0.04]
-    speed = 0.6
-    acceleration = 0.4
-    command = (
-        f"movel(p[{verf_punt[0]}, {verf_punt[1]}, {verf_punt[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
-        f"a={acceleration}, v={speed})\n"
-    )
-    print(f"{message}: {command.strip()}")
-    response = send_urscript_command(command)
-    print(f"Robot antwoord: {response}")
-    time.sleep(3)
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
-#bewegen voot tijdens het verven
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
-# terug leggen van de sample 
-def het_in_de_kast_leggen(coordinates, message=""):
+# de grijper van de robot veranderen voor een goede beet 666 
+def pick_up(coordinates, message=""):
     x, y, z = coordinates
-    x_pickup = x + 0.210 
-    z_pickup = z + 0.002
-    orientation = [-2.16, 2.17, -0.14]
-    speed = 0.6
-    acceleration = 0.4
-    command = (
-        f"movel(p[{x_pickup}, {y}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
-        f"a={acceleration}, v={speed})\n"
-    )
-    print(f"{message}: {command.strip()}")
-    response = send_urscript_command(command)
-    print(f"Robot antwoord: {response}")
-    time.sleep(2)
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
-#grijper er uit halen
-def terug_de_grijper_er_uit(coordinates, message=""):
-    x, y, z = coordinates
-    x_pickup = x + 0.210
-    y_pickup = y 
-    z_pickup = z + 0.03
-    orientation = [2.1, -2.01, -0.36]
-    speed = 0.6
-    acceleration = 0.4
+    x_pickup = x - 0.512
+    y_pickup = y -0.004
+    z_pickup = z 
+    orientation = [2.05, 2.21, 0.159]
+    speed = 0.4
+    acceleration = 0.2
     command = (
         f"movel(p[{x_pickup}, {y_pickup}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
@@ -175,7 +126,92 @@ def terug_de_grijper_er_uit(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(40)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+#omhoog met de sample voor het er uit halen
+def er_uit_halen_van_kast(coordinates, message=""):
+    x, y, z = coordinates
+    x_pickup = x 
+    z_pickup = z  + 0.004
+    orientation = [-2.14, -2.204, 0.01759]
+    speed = 0.08
+    acceleration = 0.004
+    command = (
+        f"movel(p[{x_pickup}, {y}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(40)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+def langzaam_uit_grid(coordinates, message=""):
+    x,y,z = coordinates
+    orientation = [-2.205, -2.13, 0.0071]
+    speed = 0.2
+    acceleration = 0.1
+    command = (
+        f"movel(p[0.260,{y} , {z}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(40)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+#gaat voor het verven
+def move_robot_Verf(message=""):
+    verf_punt = [0.300, 0.550, 0.500]
+    orientation = [2.19, -2.2, -0.04]
+    speed = 0.02
+    acceleration = 0.001
+    command = (
+        f"movel(p[{verf_punt[0]}, {verf_punt[1]}, {verf_punt[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(40)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+#bewegen voot tijdens het verven
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+# terug leggen van de sample 
+def het_in_de_kast_leggen(coordinates, message=""):
+    x, y, z = coordinates
+    x_pickup = x - 0.512
+    z_pickup = z + 0.04
+    y_pickup = y - 0.01
+    orientation = [-2.14, -2.204, 0.01759]
+    speed = 0.2
+    acceleration = 0.1
+    command = (
+        f"movel(p[{x_pickup}, {y_pickup}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(40)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+#grijper er uit halen
+def terug_de_grijper_er_uit(coordinates, message=""):
+    x, y, z = coordinates
+    x_pickup = x
+    y_pickup = y 
+    z_pickup = z
+    orientation = [2.13, 2.1, 0.318]
+    speed = 0.4
+    acceleration = 0.2
+    command = (
+        f"movel(p[{x_pickup}, {y_pickup}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(40)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #voor het photo maken
 def move_robot_Photo(message=""):
@@ -209,22 +245,30 @@ def process_samples():
                 if grid[rij][kolom] is not None:
                     sample = grid[rij][kolom]
                     coordinates = grid_to_coordinates(rij, kolom)
-                    
+                    camera_handler, camera_thread = run_camera_in_background(output_dir="sample_photos")
+
+                    #foto maken 
+                    camera_handler.start_camera()
+                    photo_path = camera_handler.capture_photo()
+                    print(f"Foto genomen van {sample}: {photo_path}")
+
                     # Pak en verf het sample
                     langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")
                     move_robot(coordinates, f"2. Beweging om {sample} op te pakken")
                     grid[rij][kolom] = None
                     pick_up(coordinates, f"3. Pakken van {sample} met aanpasingven van de grijper") 
-                    er_uit_halen_van_kast(coordinates, f"4. er uit halen van {sample}") 
-                    langzaam_uit_grid(coordinates, f"5. Langzaam uit {sample} in grid")
+                    orintatie_van_gripper(coordinates, f"4. Orintatie van {sample} gripper aanpassing in grid")
+                    er_uit_halen_van_kast(coordinates, f"5. er uit halen van {sample}") 
+                    langzaam_uit_grid(coordinates, f"6. Langzaam uit {sample} in grid")
                     #photo maken van sample zonder verf
-                    move_robot_Verf(f"6. Beweging om {sample} te verven")
+                                                #move_robot_Verf(f"6. Beweging om {sample} te verven")
                     #bewegingen voor het verven 
                     langzaam_uit_grid(coordinates, f"7. Langzaam uit {sample} in grid")
                     move_robot_terug(coordinates, f"8. Beweging om {sample} terug te leggen")
                     het_in_de_kast_leggen(coordinates, f"9. Beweging om {sample} terug te leggen")
-                    terug_de_grijper_er_uit(coordinates,f"10. Beweging om grijper van {sample} weg te halen")
-                    langzaam_uit_grid(coordinates, f"11. Langzaam uit {sample} in grid")
+                    orintatie_van_gripper_er_uit(coordinates, f"10. Orintatie van {sample} gripper aanpassing in grid om er uit te gaan")
+                    terug_de_grijper_er_uit(coordinates,f"11. Beweging om grijper van {sample} weg te halen")
+                    langzaam_uit_grid(coordinates, f"12. Langzaam uit {sample} in grid")
                     grid[rij][kolom] = sample
                     
 
@@ -277,6 +321,8 @@ def process_samples():
 grid[0][0] = "sample1"
 grid[0][1] = "sample2"
 grid[2][2] = "sample3"
+
+run_camera_in_background()
 
 # Start verwerking
 process_samples()
