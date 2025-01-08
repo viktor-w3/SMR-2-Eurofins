@@ -4,8 +4,9 @@ import threading
 import time
 
 class CameraHandler:
-    def __init__(self, output_dir="captured_photos"):
-        self.cap = cv2.VideoCapture(0)
+    def __init__(self, output_dir="C:\\Users\\vikto\\Desktop\\Smr 2"):
+        # Probeer de camera met DirectShow backend te openen
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  
         self.frame = None
         self.running = True
         self.output_dir = output_dir
@@ -32,7 +33,7 @@ class CameraHandler:
                 print("Live stream gestopt.")
                 self.stop()
                 break
-
+        self.stop()
         self.cap.release()
         cv2.destroyAllWindows()
 
@@ -52,10 +53,12 @@ class CameraHandler:
     def stop(self):
         """Stop de camera."""
         self.running = False
+        print("Camera gestopt.")
 
 def run_camera_in_background(output_dir="captured_photos"):
     """Functie om de camera in de achtergrond te starten."""
     camera_handler = CameraHandler(output_dir=output_dir)
     camera_thread = threading.Thread(target=camera_handler.start_camera)
+    camera_thread.daemon = True  # Zorgt ervoor dat de thread eindigt wanneer het hoofdprogramma stopt
     camera_thread.start()
     return camera_handler, camera_thread
