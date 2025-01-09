@@ -1,6 +1,8 @@
 from camera_module import CameraHandler
 import time
 import socket
+import os
+photo_counter = 0 
 
 # Grid-instelling
 grid = [
@@ -234,6 +236,34 @@ def move_robot_Photo(message=""):
 #bewegen in de foto box 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+#een foto maken code
+def take_photo(sample_base_name="sample", output_dir_base="C:\\Users\\vikto\\Desktop\\Smr 2"):
+    global photo_counter
+    photo_counter += 1  # Verhoog de teller
+
+    # Bereken de sample map (elke 3 foto's verandert de sample naam)
+    sample_number = (photo_counter - 1) // 3 + 1
+    sample_name = f"{sample_base_name}{sample_number}"
+    output_dir = os.path.join(output_dir_base, sample_name)
+
+    # Zorg ervoor dat de output-directory bestaat
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Stel de bestandsnaam voor de foto in
+    photo_name = f"{sample_name}_photo{photo_counter}.jpg"
+    photo_path = os.path.join(output_dir, photo_name)
+
+    # Maak de foto (camera-module)
+    try:
+        camera_handler = CameraHandler(output_dir=output_dir)
+        camera_handler.capture_photo(photo_path)  # Specificeer de volledige bestandsnaam
+        camera_handler.release_camera()
+        print(f"Foto opgeslagen: {photo_path}")
+    except Exception as e:
+        print(f"Fout bij het maken van de foto: {e}")
+
+    return photo_path
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Automatisch verwerkingssysteem
 def process_samples():
     while True:  # Herhaal het proces continu
@@ -245,10 +275,6 @@ def process_samples():
                 if grid[rij][kolom] is not None:
                     sample = grid[rij][kolom]
                     coordinates = grid_to_coordinates(rij, kolom)
-                    
-                    camera_handler = CameraHandler(output_dir="C:\\Users\\vikto\\Desktop\\Smr 2")
-                    photo_path = camera_handler.capture_photo()
-                    camera_handler.release_camera()
 
                     # Pak en verf het sample
                     langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")
@@ -259,7 +285,11 @@ def process_samples():
                     er_uit_halen_van_kast(coordinates, f"5. er uit halen van {sample}") 
                     langzaam_uit_grid(coordinates, f"6. Langzaam uit {sample} in grid")
                     #photo maken van sample zonder verf
-                                                #move_robot_Verf(f"6. Beweging om {sample} te verven")
+                    #move_robot_Verf(f"6. Beweging om {sample} te verven") 
+                    #rele schakelen voor licth   
+                    take_photo(f"Photo zonder verf van {sample}")
+                    #rele uitschakelen voor licth
+
                     #bewegingen voor het verven 
                     langzaam_uit_grid(coordinates, f"7. Langzaam uit {sample} in grid")
                     move_robot_terug(coordinates, f"8. Beweging om {sample} terug te leggen")
@@ -296,7 +326,13 @@ def process_samples():
 
                     # Fotografeer het sample
                     move_robot_Photo(f"Beweging om {s} te fotograferen")
-
+                    #rele schakelen voor licht 
+                    take_photo(f"Photo met verf in normaal licht van {sample}")
+                    #rele schakelen voor licht uit te zetten  
+                    # Fotografeer het sample in uv----------------------------------------------------------------------- 
+                    #rele schakelen voor licht van uv  
+                    take_photo(f"Photo in uv licht van {sample}")
+                    #rele uitschakelen voor licht van uv  
                     # Breng het sample terug
                     langzaam_naar_grid(coordinates, f"Langzaam naar {s} in grid")
                     move_robot(coordinates, f"Beweging om {s} terug te leggen")
