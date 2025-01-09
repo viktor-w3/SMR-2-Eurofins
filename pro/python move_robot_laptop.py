@@ -1,4 +1,4 @@
-from camera_module import run_camera_in_background, CameraHandler
+from camera_module import CameraHandler
 import time
 import socket
 
@@ -43,7 +43,7 @@ def move_robot(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Functie om de robot te bewegen voor weer in de grid
 def move_robot_terug(coordinates, message=""):
@@ -59,7 +59,7 @@ def move_robot_terug(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(40)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #omhoog met de sample voor het er uit halen
 def orintatie_van_gripper(coordinates, message=""):
@@ -76,7 +76,7 @@ def orintatie_van_gripper(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(40)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #omhoog met de sample voor het er uit halen
 def orintatie_van_gripper_er_uit(coordinates, message=""):
@@ -93,7 +93,7 @@ def orintatie_van_gripper_er_uit(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(40)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #gaat rustig naar de positie toe
 def langzaam_naar_grid(coordinates, message=""):
@@ -108,7 +108,7 @@ def langzaam_naar_grid(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # de grijper van de robot veranderen voor een goede beet 666 
 def pick_up(coordinates, message=""):
@@ -126,7 +126,7 @@ def pick_up(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(40)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #omhoog met de sample voor het er uit halen
 def er_uit_halen_van_kast(coordinates, message=""):
@@ -143,7 +143,7 @@ def er_uit_halen_van_kast(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(40)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 def langzaam_uit_grid(coordinates, message=""):
     x,y,z = coordinates
@@ -157,7 +157,7 @@ def langzaam_uit_grid(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(40)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #gaat voor het verven
 def move_robot_Verf(message=""):
@@ -172,7 +172,7 @@ def move_robot_Verf(message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(40)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #bewegen voot tijdens het verven
 
@@ -211,7 +211,7 @@ def terug_de_grijper_er_uit(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(40)
+    time.sleep(2)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 #voor het photo maken
 def move_robot_Photo(message=""):
@@ -245,12 +245,10 @@ def process_samples():
                 if grid[rij][kolom] is not None:
                     sample = grid[rij][kolom]
                     coordinates = grid_to_coordinates(rij, kolom)
-                    camera_handler, camera_thread = run_camera_in_background(output_dir="sample_photos")
-
-                    #foto maken 
-                    camera_handler.start_camera()
+                    
+                    camera_handler = CameraHandler(output_dir="C:\\Users\\vikto\\Desktop\\Smr 2")
                     photo_path = camera_handler.capture_photo()
-                    print(f"Foto genomen van {sample}: {photo_path}")
+                    camera_handler.release_camera()
 
                     # Pak en verf het sample
                     langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")
@@ -322,7 +320,6 @@ grid[0][0] = "sample1"
 grid[0][1] = "sample2"
 grid[2][2] = "sample3"
 
-run_camera_in_background()
 
 # Start verwerking
 process_samples()
