@@ -1,64 +1,52 @@
 import cv2
 import os
-import threading
 import time
 
 class CameraHandler:
     def __init__(self, output_dir="C:\\Users\\vikto\\Desktop\\Smr 2"):
-        # Probeer de camera met DirectShow backend te openen
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  
-        self.frame = None
-        self.running = True
+        # Probeer de camera te openen
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
-        self.lock = threading.Lock()  # Voor veilige toegang tot gedeelde data
+        self.sample_counter = 1  # Teller voor sample sets
+        self.photo_counter_within_sample = 0  # Foto's binnen huidige sample-set
 
-    def start_camera(self):
-        """Start de camera en blijf frames lezen."""
+    def capture_photo(self, base_name="sample"):
+        """Maak een foto en sla deze op. Verander naam na elke 3 foto's."""
         if not self.cap.isOpened():
             print("Kan de camera niet openen.")
-            return
+            return None
 
-        print("Camera gestart. Live stream actief...")
-        while self.running:
-            ret, frame = self.cap.read()
-            if not ret:
-                print("Kan frame niet lezen.")
-                break
-            with self.lock:
-                self.frame = frame  # Sla het huidige frame op
-            # Toon de live stream (optioneel)
-            cv2.imshow("Live Camera", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                print("Live stream gestopt.")
-                self.stop()
-                break
-        self.stop()
-        self.cap.release()
-        cv2.destroyAllWindows()
+        # Wacht kort om de camera te laten stabiliseren
+        time.sleep(2)  # Wacht 2 seconden
+        print("Camera gestabiliseerd.")
 
-    def capture_photo(self):
-        """Maak een foto en sla deze op."""
-        with self.lock:
-            if self.frame is not None:
-                timestamp = int(time.time())  # Unieke timestamp
-                photo_path = os.path.join(self.output_dir, f"photo_{timestamp}.jpg")
-                cv2.imwrite(photo_path, self.frame)
-                print(f"Foto opgeslagen: {photo_path}")
-                return photo_path
-            else:
-                print("Geen frame beschikbaar om een foto te maken.")
-                return None
+        # Lees een paar frames om te zorgen dat de camera goed is ingesteld
+        for _ in range(5):
+            self.cap.read()
 
-    def stop(self):
-        """Stop de camera."""
-        self.running = False
-        print("Camera gestopt.")
+        # Neem het daadwerkelijke frame
+        ret, frame = self.cap.read()
+        if not ret:
+            print("Kan geen frame lezen.")
+            return None
 
-def run_camera_in_background(output_dir="captured_photos"):
-    """Functie om de camera in de achtergrond te starten."""
-    camera_handler = CameraHandler(output_dir=output_dir)
-    camera_thread = threading.Thread(target=camera_handler.start_camera)
-    camera_thread.daemon = True  # Zorgt ervoor dat de thread eindigt wanneer het hoofdprogramma stopt
-    camera_thread.start()
-    return camera_handler, camera_thread
+        # Genereer de naam op basis van de huidige sample set en foto nummer
+        photo_name = f"{base_name}_{self.sample_counter}_photo_{self.photo_counter_within_sample + 1}.jpg"
+        photo_path = os.path.join(self.output_dir, photo_name)
+        cv2.imwrite(photo_path, frame)
+        print(f"Foto opgeslagen: {photo_path}")
+
+        # Update tellers
+        self.photo_counter_within_sample += 1
+        if self.photo_counter_within_sample == 3:  # Na 3 foto's overschakelen naar de volgende sample
+            self.sample_counter += 1
+            self.photo_counter_within_sample = 0
+
+        return photo_path
+
+    def release_camera(self):
+        """Sluit de camera."""
+        if self.cap.isOpened():
+            self.cap.release()
+        print("Camera vrijgegeven.")
