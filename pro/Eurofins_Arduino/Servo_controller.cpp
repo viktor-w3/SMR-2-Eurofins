@@ -1,3 +1,4 @@
+//Servo_controller.cpp
 #include "Servo_controller.h"
 //#include <Arduino.h> // For Testing Purposes
 
@@ -8,7 +9,7 @@ myservo.attach(5);  // attaches the servo on pin 5 to the Servo object
 }
 
 void servo_on() {
-  myservo.write(90); // Tell servo to go to position 90 degrees
+  myservo.write(35); // Tell servo to go to position 90 degrees
   //Serial.println("Servo 90"); // For Testing Purposes
 }
 void servo_off() {

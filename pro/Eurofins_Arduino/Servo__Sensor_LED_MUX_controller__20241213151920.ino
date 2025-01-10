@@ -36,8 +36,7 @@ Multiple multiplexers can be connected to the Arduino. At minimum, all multiplex
 /*Example code for LEDs:
   initialize_leds(); //initialize all LED strips.
   set_all_leds(CRGB::Red); //Set all LEDs to red
-  set_strip_leds(1,CRGB::Blue); // Set all LEDs on strip 1 to Blue
-  set_led(0 ,5 ,CRGB::Green); // Set led 5 (6th led, 0-based) on strip 0 to Green
+  set_led_range(1, 5, 10, Red); // Display Red LEDS on Ledstrip 1 on LED 5 to 10.
   load_bar(CRGB::Yellow,5000, 1) // Display a yellow loading bar on LED strip 1for 5 seconds
   set_all_leds(CRGB::Black); // Turn off all LEDs
 */
@@ -64,170 +63,173 @@ void loop() {
     // Check if a command is available via the serial interface
     if (Serial.available()) {
         String command = Serial.readStringUntil('\n'); // Read the incoming command
-        Serial.print("Received command: "); // Debugging print
-        Serial.println(command); // Show the received command
+        //Serial.print("Received command: "); // Debugging print
+        //Serial.println(command); // Show the received command
         command.trim();                                // Remove leading/trailing whitespace
         processCommand(command);                      // Process the received command
     }
-    //readMuxChannel(mux2, 2);
-    //readMultiplexer(mux1);
 }
 
-/*List of ALL command calls of Python for the Arduino*/
+/* Process commands */
 void processCommand(String command) {
-    
-    /*Servo Controlls*/
-    if (command == "initialize_servo") {
-        // Reinitialize the servo
-        initialize_servo();
-        delay(100);              // Allow time for reinitialization
-        Serial.println("done");  // Confirm the action is complete
+  command.trim();  // Trim leading/trailing whitespace
 
-    } else if (command == "servo_on") {
-        // Move servo to the "on" position (90 degrees)
-        servo_on();
-        delay(500);              // Allow time for the servo to move
-        Serial.println("done");  // Confirm the action is complete
-
-    } else if (command == "servo_off") {
-        // Move servo to the "off" position (0 degrees)
-        servo_off();
-        delay(500);              // Allow time for the servo to move
-        Serial.println("done");  // Confirm the action is complete
-
-    /*Mux controls*/
-    } else if (command == "read_mux0") {
-        readMultiplexer("MUX0", mux0); // Read all channels of mux0
-        Serial.println("done"); // Confirm the action is complete
-    } else if (command == "read_mux1") {
-        readMultiplexer("MUX1", mux1); // Read all channels of mux1
+    if (command.startsWith("initialize_")) {
+        if (command == "initialize_servo") {
+            initialize_servo();
+        } else if (command == "initialize_leds") {
+            initialize_leds();
+        }
         Serial.println("done");
-    } else if (command == "read_mux2") {
-        readMultiplexer("MUX2", mux2); // Read all channels of mux2
-        Serial.println("done");
+    } else if (command.startsWith("servo_")) {
+        handleServoCommand(command);
     } else if (command.startsWith("read_mux_channel")) {
-        int spaceIndex = command.indexOf(' ');
-        if (spaceIndex != -1) {
-            int muxIndex = command.substring(spaceIndex + 1, spaceIndex + 2).toInt();
-            int channelIndex = command.substring(spaceIndex + 3).toInt();
-
-            if (muxIndex == 0) {
-                readMuxChannel("MUX0", mux0, channelIndex);
-            } else if (muxIndex == 1) {
-                readMuxChannel("MUX1", mux1, channelIndex);
-            } else if (muxIndex == 2) {
-                readMuxChannel("MUX2", mux2, channelIndex);
-            }
-            Serial.println("done");
-        }
-        
-    /*LED Controlls*/
-    } else if (command == "initialize_leds") {
-        // Initialize the LED strips
-        initialize_leds();
-        delay(100);              // Allow time for reinitialization
-        Serial.println("done");  // Confirm the action is complete
-
-    } else if (command.startsWith("set_all_leds")) {
-      // Extract and log color
-      String color = command.substring(13);
-      Serial.println("Received color: " + color);  // Debugging
-      CRGB ledColor = parseColor(color);
-      set_all_leds(ledColor);
-      Serial.println("done");
-
-    } else if (command.startsWith("set_strip_leds")) {
-        // Set all LEDs in a specific strip to the specified color
-        int stripIndex = command.charAt(14) - '0';
-        String color = command.substring(16);
-        CRGB ledColor = parseColor(color);
-        set_strip_leds(stripIndex, ledColor);
-        delay(100);
-        Serial.println("done");
-
+        handleMuxCommand(command);
     } else if (command.startsWith("set_led_range")) {
-        // Stel een reeks LEDs in op een specifieke strip
-        String params = command.substring(14);
-        int firstSpace = params.indexOf(' ');
-        int secondSpace = params.indexOf(' ', firstSpace + 1);
-        int thirdSpace = params.indexOf(' ', secondSpace + 1);
-        int stripIndex = params.substring(0, firstSpace).toInt();
-        int startLed = params.substring(firstSpace + 1, secondSpace).toInt();
-        int endLed = params.substring(secondSpace + 1, thirdSpace).toInt();
-        String colorName = params.substring(thirdSpace + 1);
-        CRGB color = parseColor(colorName);
-        set_led_range(stripIndex, startLed, endLed, color);
-        delay(100);              // Allow time for the LEDs to update
-        Serial.println("done");  // Confirm the action is complete
-
+        handleSetLedRange(command);
     } else if (command.startsWith("load_bar_range")) {
-        // Command format: "load_bar_range color duration stripIndex startIndex endIndex"
-        String params = command.substring(15);
-        int firstSpace = params.indexOf(' ');
-        int secondSpace = params.indexOf(' ', firstSpace + 1);
-        int thirdSpace = params.indexOf(' ', secondSpace + 1);
-        int fourthSpace = params.indexOf(' ', thirdSpace + 1);
-
-        String color = params.substring(0, firstSpace);
-        unsigned long duration = params.substring(firstSpace + 1, secondSpace).toInt();
-        int stripIndex = params.substring(secondSpace + 1, thirdSpace).toInt();
-        int startIndex = params.substring(thirdSpace + 1, fourthSpace).toInt();
-        int endIndex = params.substring(fourthSpace + 1).toInt();
-
-        CRGB crgbColor = parseColor(color);
-        load_bar_range(crgbColor, duration, stripIndex, startIndex, endIndex);
-       
-        delay(100);
-        Serial.println("done");
-
+        handleLoadBarRange(command);
     } else if (command.startsWith("blink")) {
-        String params = command.substring(6);
-        int firstSpace = params.indexOf(' ');
-        String type = params.substring(0, firstSpace);
-        params = params.substring(firstSpace + 1);
-
-        if (type == "single") {
-            int stripIndex = params.substring(0, params.indexOf(' ')).toInt();
-            int ledIndex = params.substring(params.indexOf(' ') + 1, params.lastIndexOf(' ')).toInt();
-            String colorName = params.substring(params.lastIndexOf(' ') + 1);
-            int speed = params.substring(params.lastIndexOf(' ') + 1).toInt();
-
-            CRGB color = parseColor(colorName);
-            blink_single_led(stripIndex, ledIndex, color, speed);
-
-        } else if (type == "all") {
-            int stripIndex = params.substring(0, params.indexOf(' ')).toInt();
-            String colorName = params.substring(params.indexOf(' ') + 1, params.lastIndexOf(' '));
-            int speed = params.substring(params.lastIndexOf(' ') + 1).toInt();
-
-            CRGB color = parseColor(colorName);
-            blink_all_leds_on_strip(stripIndex, color, speed);
-
-        } else if (type == "range") {
-            int stripIndex = params.substring(0, params.indexOf(' ')).toInt();
-            params = params.substring(params.indexOf(' ') + 1);
-            int startLed = params.substring(0, params.indexOf(' ')).toInt();
-            params = params.substring(params.indexOf(' ') + 1);
-            int endLed = params.substring(0, params.indexOf(' ')).toInt();
-            String colorName = params.substring(params.indexOf(' ') + 1, params.lastIndexOf(' '));
-            int speed = params.substring(params.lastIndexOf(' ') + 1).toInt();
-
-            CRGB color = parseColor(colorName);
-            blink_led_range(stripIndex, startLed, endLed, color, speed);
-        }
-        delay(100);
-        Serial.println("done");
-
+        handleBlinkCommand(command);
+    } else if (command.startsWith("set_all_leds")) {
+        handleSetAllLeds(command);
     } else {
         Serial.println("Unknown command");
     }
 }
 
-CRGB parseColor(String colorName) {
-    if (colorName == "Red") return CRGB::Red;
-    if (colorName == "Green") return CRGB::Green;
-    if (colorName == "Blue") return CRGB::Blue;
-    if (colorName == "Yellow") return CRGB::Yellow;
-    return CRGB::Black;  // Default to Black
+void handleSetAllLeds(String command) {
+    // Extract the color from the command
+    String colorName = getCommandParam(command, 1);
+    CRGB color = parseColor(colorName);
+
+    // Set all LEDs to the parsed color
+    set_all_leds(color);
+
+    delay(100);  // Optional delay for stability
+    Serial.println("done");
 }
 
+/* Servo-related commands */
+void handleServoCommand(String command) {
+    if (command == "servo_on") {
+        servo_on();
+    } else if (command == "servo_off") {
+        servo_off();
+    }
+    delay(500);
+    Serial.println("done");
+}
+
+void handleMuxCommand(String command) {
+    int muxIndex = getCommandParam(command, 1).toInt();
+    int channelIndex = getCommandParam(command, 2).toInt();
+    if (muxIndex == 0) {
+        readMuxChannel("MUX0", mux0, channelIndex);
+    } else if (muxIndex == 1) {
+        readMuxChannel("MUX1", mux1, channelIndex);
+    } else if (muxIndex == 2) {
+        readMuxChannel("MUX2", mux2, channelIndex);
+    }
+    Serial.println("done");
+}
+
+/* Handle LED range setting */
+void handleSetLedRange(String command) {
+    int stripIndex = getCommandParam(command, 1).toInt();
+    int startLed = getCommandParam(command, 2).toInt();
+    int endLed = getCommandParam(command, 3).toInt();
+    String colorName = getCommandParam(command, 4);
+    CRGB color = parseColor(colorName);
+    set_led_range(stripIndex, startLed, endLed, color);
+    delay(100);
+    Serial.println("done");
+}
+
+/* Handle load bar range */
+void handleLoadBarRange(String command) {
+    // Extract parameters from the command string
+    String color = getCommandParam(command, 1);  // Color as string (e.g., "Red")
+    unsigned long duration = getCommandParam(command, 2).toInt();  // Duration
+    int stripIndex = getCommandParam(command, 3).toInt();  // Strip index
+    int startIndex = getCommandParam(command, 4).toInt();  // Start LED index
+    int endIndex = getCommandParam(command, 5).toInt();  // End LED index
+    
+    // Convert color name to CRGB object using parseColor
+    CRGB crgbColor = parseColor(color);
+    
+    // Debugging: Print the parsed color for confirmation
+    Serial.print("Received color: ");
+    Serial.println(color);
+    Serial.print("Parsed RGB color: ");
+    Serial.print(crgbColor.r);
+    Serial.print(", ");
+    Serial.print(crgbColor.g);
+    Serial.print(", ");
+    Serial.println(crgbColor.b);
+
+    // Call the load_bar_range function with the parsed parameters
+    load_bar_range(crgbColor, duration, stripIndex, startIndex, endIndex);
+    
+    // Brief delay to ensure the command completes
+    delay(100);
+    
+    // Confirm the completion of the command
+    Serial.println("done");
+}
+
+/* Handle blink commands */
+void handleBlinkCommand(String command) {
+    String type = getCommandParam(command, 1);
+    int stripIndex = getCommandParam(command, 2).toInt();
+    if (type == "range") {
+        int startLed = getCommandParam(command, 3).toInt();
+        int endLed = getCommandParam(command, 4).toInt();
+        String colorName = getCommandParam(command, 5);
+        int speed = getCommandParam(command, 6).toInt();
+        blink_led_range(stripIndex, startLed, endLed, parseColor(colorName), speed);
+    }
+    delay(100);
+    Serial.println("done");
+}
+
+/* Parse the color name and return corresponding CRGB object */
+CRGB parseColor(String colorName) {
+    // Map the color name to corresponding CRGB value
+    if (colorName == "Red") {
+        return CRGB::Red;
+    } else if (colorName == "Green") {
+        return CRGB::Green;
+    } else if (colorName == "Blue") {
+        return CRGB::Blue;
+    } else if (colorName == "Yellow") {
+        return CRGB::Yellow;
+    } else if (colorName == "White") {
+        return CRGB::White;
+    } else if (colorName == "Purple") {
+        return CRGB::Purple;
+    } else if (colorName == "Orange") {
+        return CRGB::Orange;
+    } else {
+        // Default to black if color is not recognized
+        return CRGB::Black;
+    }
+}
+
+/* Helper function to extract parameters using commas */
+String getCommandParam(String command, int paramIndex) {
+    // Ensure the command is properly split into parameters
+    int spaceIndex1 = command.indexOf(' ');
+    int spaceIndex2;
+    for (int i = 1; i < paramIndex; i++) {
+        spaceIndex2 = command.indexOf(' ', spaceIndex1 + 1);
+        spaceIndex1 = spaceIndex2;
+    }
+    spaceIndex2 = command.indexOf(' ', spaceIndex1 + 1);
+    
+    if (spaceIndex2 == -1) { // no more spaces, last parameter
+        return command.substring(spaceIndex1 + 1);
+    } else {
+        return command.substring(spaceIndex1 + 1, spaceIndex2);
+    }
+}

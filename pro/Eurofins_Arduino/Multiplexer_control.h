@@ -8,10 +8,13 @@
 class Multiplexer {
 public:
     // Constructor: Initializes the multiplexer with specified pins
-    Multiplexer(int pinA, int pinB, int pinC, int outputPin); //Initialize the pins of the multiplexer
+    // pinA, pinB, pinC are address line pins, outputPin is where the multiplexer output is connected
+    Multiplexer(int pinA, int pinB, int pinC, int outputPin); 
+
     // Selects a specific channel (0-7)
     void selectChannel(int channel);
-    // Reads the value from the selected channel
+
+    // Reads the value from the selected channel (1 or 0)
     int readChannel();
 
 private:
@@ -26,10 +29,10 @@ extern Multiplexer mux0;
 extern Multiplexer mux1;
 extern Multiplexer mux2;
 
-// Function to read the complete Multiplexer and print data for all channels
+// Function to read all channels of a given multiplexer and print their values
 void readMultiplexer(const char* muxName, Multiplexer& mux);
 
-// Function to read a specific channel of a Multiplexer and print its data
+// Function to read a specific channel of a given multiplexer and print the value
 void readMuxChannel(const char* muxName, Multiplexer& mux, int channel);
 
 #endif

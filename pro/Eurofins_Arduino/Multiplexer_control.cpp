@@ -28,29 +28,32 @@ int Multiplexer::readChannel() {
     return digitalRead(_outputPin);
 }
 
-/* Utility Functions to Read Multiplexer Channels */
+// Read all channels of the specified multiplexer and print values
 void readMultiplexer(const char* muxName, Multiplexer& mux) {
     for (int channel = 0; channel < 8; channel++) {
-        mux.selectChannel(channel); // Select the current channel
-        int value = mux.readChannel(); // Read the value of the current channel
-        Serial.print("Multiplexer ");
-        Serial.print(muxName);
-        Serial.print(" - Channel ");
-        Serial.print(channel);
-        Serial.print(": ");
-        Serial.println(value); // Send the value (1 or 0) to Python
-        delay(100);
+        mux.selectChannel(channel);        // Select the current channel
+        int value = mux.readChannel();     // Read the value of the current channel
+        //Serial.print("Multiplexer ");
+        //Serial.print(muxName);             // Print the multiplexer name
+        //Serial.print(" - Channel ");
+        //Serial.print(channel);             // Print the channel number
+        //Serial.print(": ");
+        Serial.println(value);             // Print the read value (1 or 0)
+        delay(100);                        // Small delay for readability
     }
 }
 
+
+// Read a specific channel from the specified multiplexer and print its value
 void readMuxChannel(const char* muxName, Multiplexer& mux, int channel) {
-    mux.selectChannel(channel); // Select the specified channel
-    int value = mux.readChannel(); // Read the value of the specified channel
-    Serial.print("Multiplexer ");
-    Serial.print(muxName);
-    Serial.print(" - Channel ");
-    Serial.print(channel);
-    Serial.print(": ");
-    Serial.println(value); // Send the value (1 or 0) to Python
-    delay(100);
+    mux.selectChannel(channel);           // Select the specific channel
+    delay(50);                            // Delay to ensure proper selection (can be optimized)
+    int value = mux.readChannel();        // Read the value of the specified channel
+    //Serial.print("Multiplexer ");
+    //Serial.print(muxName);                // Print the multiplexer name
+    //Serial.print(" - Channel ");
+    //Serial.print(channel);                // Print the channel number
+    //Serial.print(": ");
+    Serial.println(value);                // Print the value of the channel (1 or 0)
+    delay(100);                           // Small delay for readability
 }
