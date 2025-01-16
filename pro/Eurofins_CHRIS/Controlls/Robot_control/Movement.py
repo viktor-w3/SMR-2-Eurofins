@@ -193,66 +193,156 @@ def terug_de_grijper_er_uit(coordinates, message=""):
 # voor het photo maken
 def move_robot_Photo1(photo_punt1, message=""):
     photo_punt1 = [-0.15, - 0.209, 0.041]
-    orientation = [-2.23, -2.18, 0.0]
-    speed = 0.8
-    acceleration = 0.5
+    orientation = [-2.16, -2.12, 0.17]
+    speed = 0.08
+    acceleration = 0.05
     command = (
         f"movel(p[{photo_punt1[0]}, {photo_punt1[1]}, {photo_punt1[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
-
-    )
-    print(f"{message}: {command.strip()}")
-    response = send_urscript_command(command)
-    print(f"Robot antwoord: {response}")
-    time.sleep(2)
-
-
-def move_robot_Photo2(photo_punt2, message=""):
-    photo_punt2 = [-0.315, - 0.219, 0.041]
-    orientation = [-3.1, -0.02, 0.0]
-    speed = 0.8
-    acceleration = 0.5
-    command = (
-        f"movel(p[{photo_punt2[0]}, {photo_punt2[1]}, {photo_punt2[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
-        f"a={acceleration}, v={speed})\n"
-
-    )
-    print(f"{message}: {command.strip()}")
-    response = send_urscript_command(command)
-    print(f"Robot antwoord: {response}")
-    time.sleep(2)
-
-
-def move_robot_Photo3(photo_punt3, message=""):
-    photo_punt3 = [-0.401, - 0.156, 0.081]
-    orientation = [-3.06, 0.0, 0.0]
-    speed = 0.08
-    acceleration = 0.005
-    command = (
-        f"movel(p[{photo_punt3[0]}, {photo_punt3[1]}, {photo_punt3[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
-        f"a={acceleration}, v={speed})\n"
-
+       
     )
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(20)
-
-
+def move_robot_Photo2(photo_punt2, message=""):
+    photo_punt2 = [-0.315, - 0.219, 0.041]
+    orientation = [-2.9, -0.02, 0.0]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{photo_punt2[0]}, {photo_punt2[1]}, {photo_punt2[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+       
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
+def move_robot_Photo3(photo_punt3, message=""):
+    photo_punt3 = [-0.433, - 0.189, 0.047]
+    orientation = [-2.89, 0.03, -0.002]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{photo_punt3[0]}, {photo_punt3[1]}, {photo_punt3[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+       
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
 def move_robot_Photo4(photo_punt4, message=""):
-    photo_punt4 = [-0.401, 0.3122, 0.081]
-    orientation = [-3.1, 0.0, 0.0]
+    photo_punt4 = [-0.433, 0.305, 0.047]
+    orientation = [-2.9, 0.01, 0.0]
     speed = 0.08
     acceleration = 0.005
     command = (
         f"movel(p[{photo_punt4[0]}, {photo_punt4[1]}, {photo_punt4[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
         f"a={acceleration}, v={speed})\n"
-
+       
     )
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(20)
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
-# bewegen in de foto box
-
+# bewegen voor het verven
+def move_robot_verf1(verf_punt1, message=""):
+    verf_punt1 = [-0.159, 0.193, 0.112]
+    orientation = [-2.15, -2.09, 0.01]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{verf_punt1[0]}, {verf_punt1[1]}, {verf_punt1[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+       
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
+def move_robot_verf2(verf_punt2, message=""):
+    verf_punt2 = [-0.315, 0.140, 0.041]
+    orientation = [0.016, -3.13, 0.22]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{verf_punt2[0]}, {verf_punt2[1]}, {verf_punt2[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+       
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
+def move_robot_verf3(verf_punt3, message=""):
+    verf_punt3 = [-0.314, - 0.285, 0.041]
+    orientation = [0.016, -3.1, 0.22]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{verf_punt3[0]}, {verf_punt3[1]}, {verf_punt3[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+       
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
+def move_robot_verf4(verf_punt4, message=""):
+    verf_punt4 = [-0.451, -0.284, 0.041]
+    orientation = [0, 3.1, -0.18]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{verf_punt4[0]}, {verf_punt4[1]}, {verf_punt4[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+       
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
+def move_robot_verf5(verf_punt5, message=""):
+    verf_punt5 = [-0.451, -0.317, 0.041]
+    orientation = [0, 3.1, -0.18]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{verf_punt5[0]}, {verf_punt5[1]}, {verf_punt5[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+       
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
+def move_robot_verf6(verf_punt6, message=""):
+    verf_punt6 = [-0.451, -0.090, 0.043]
+    orientation = [0, 3.1, -0.18]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{verf_punt6[0]}, {verf_punt6[1]}, {verf_punt6[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+       
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
+def vervenklaar(vervenklaar, message=""):
+    vervenklaar = [-0.451, 0.152, 0.045]
+    orientation = [0, 3.1, -0.18]
+    speed = 0.08
+    acceleration = 0.005
+    command = (
+        f"movel(p[{vervenklaar[0]}, {vervenklaar[1]}, {vervenklaar[2]},{orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
