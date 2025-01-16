@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 import threading
+from Process.Robot_process import process_samples  # Import process_samples
 import os
 import subprocess
 
@@ -115,8 +116,11 @@ class EurofinsGUI:
     def start_knop_action(self):
         self.status_label.config(text="Proces gestart", fg="green")
         self.running = True  # Set the flag to True to start the thread
-        # Start process in a new thread using a lambda to avoid the need for self argument
-        threading.Thread(target=self.process_samples, daemon=True).start()
+        # Start process in a new thread
+        threading.Thread(target=self.start_process_samples, daemon=True).start()
+
+    def start_process_samples(self):
+        process_samples()  # Call the imported process_samples function
 
     def open_folder(self):
         folder_path = r"C:\Users\...\Desktop\Smr 2"
@@ -124,9 +128,3 @@ class EurofinsGUI:
             subprocess.Popen(f'explorer "{folder_path}"')
         else:
             print(f"De map {folder_path} bestaat niet.")
-
-    # Update lampjes status
-    def update_lamp(self, row, col, status):
-        colors = {"red": "red", "green": "green", "orange": "orange"}
-        if status in colors:
-            self.lampjes[row][col].config(bg=colors[status])
