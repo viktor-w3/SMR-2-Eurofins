@@ -18,7 +18,7 @@ class ArduinoConnection:
         print(f"Connected to Arduino on {self.port}")
 
     def send_command(self, command, param=""):
-        """Send command to Arduino and print response."""
+        """Send command to Arduino and return the response."""
         full_command = f"{command} {param}\n"
         print(f"Sending: {full_command.strip()}")  # Print command before sending
         self.serial_connection.write(full_command.encode())
@@ -26,12 +26,13 @@ class ArduinoConnection:
 
         while True:
             response = self.serial_connection.readline().decode().strip()
-            if response == "done":
-                print("Arduino: done")
-                break
-            elif response:
+            if response:  # If there is any response
                 print(f"Arduino: {response}")
+                if response == "done":
+                    return response  # Return the response if it's done (or you could handle specific responses as needed)
+                return response  # Return non-"done" responses directly (e.g., sensor status)
 
     def read_response(self):
         """Read the response from Arduino."""
         return self.serial_connection.readline().decode().strip()
+

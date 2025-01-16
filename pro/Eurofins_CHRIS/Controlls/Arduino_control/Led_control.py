@@ -1,10 +1,9 @@
 # Controlls/Arduino_control/Led_control.py
 
-from .Command import ArduinoCommands
-
 class LEDControl:
-    def __init__(self, commands: ArduinoCommands):
-        self.commands = commands
+    def __init__(self, commands):
+        """Initializes the LEDControl class with commands."""
+        self.commands = commands  # Expecting ArduinoCommands as the commands parameter
 
     def initialize_leds(self):
         """Initialize the LEDs."""
@@ -17,3 +16,7 @@ class LEDControl:
     def set_led_range(self, strip_index, start_index, end_index, color):
         """Set a range of LEDs on a strip to a color."""
         self.commands.set_led_range(strip_index, start_index, end_index, color)
+
+    def load_bar_range(self, color, duration, strip_index, start_index, end_index):
+        """Send command to display a loading bar on a specific range of LEDs."""
+        self.commands.load_bar_range(color, duration, strip_index, start_index, end_index)

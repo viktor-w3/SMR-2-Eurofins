@@ -11,8 +11,8 @@ class MuxStatusTracker:
     def monitor_mux_and_control_leds(self):
         """Monitor multiplexer channels and control corresponding LEDs."""
         sensor_to_mux_channel = {
-            0: (1, 0), 1: (1, 1), 2: (1, 2), 3: (1, 3), 4: (1, 4),
-            5: (0, 0), 6: (0, 1), 7: (0, 2), 8: (0, 3)
+            0: (1, 0), 4: (1, 1), 2: (1, 2), 3: (1, 3), 1: (1, 4),
+            5: (0, 0), 8: (0, 1), 7: (0, 2), 6: (0, 4)
         }
 
         sensor_to_led_strip = {
@@ -22,6 +22,25 @@ class MuxStatusTracker:
         }
 
         for sensor_id in range(9):
+            print(f"Checking sensor {sensor_id}...")
+
+            # Map sensor ID to multiplexer and channel
             mux_number, channel_number = sensor_to_mux_channel[sensor_id]
-            self.mux_control.read_mux_channel(mux_number, channel_number)
-            # Add logic to check sensor status and update LEDs accordingly.
+
+            # Read the status of the channel using the correct method (read_mux_channel)
+            sensor_status = self.mux_control.read_mux_channel(mux_number, channel_number)
+
+            if sensor_status is None:
+                print(f"Sensor {sensor_id} failed to respond or invalid.")
+                continue
+
+            # Map the sensor to LED strip indices
+            led_strip, start_led, end_led = sensor_to_led_strip[sensor_id]
+
+            # Act based on sensor status
+            if sensor_status == '0':
+                print(f"Sensor {sensor_id} is LOW. Turning LEDs red.")
+                self.led_control.set_led_range(led_strip, start_led, end_led, "Red")
+            elif sensor_status == '1':
+                print(f"Sensor {sensor_id} is HIGH. Turning LEDs off.")
+                self.led_control.set_led_range(led_strip, start_led, end_led, "Green")

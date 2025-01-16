@@ -2,7 +2,12 @@
 
 import time
 
-def clear_buffer(arduino):
-    """Helper function to reset the input buffer and add a short delay."""
-    arduino.reset_input_buffer()  # Clear serial buffer
-    time.sleep(0.1)
+# utils.py
+
+def clear_buffer(arduino_commands):
+    # Ensure that arduino_commands has access to the serial instance
+    if hasattr(arduino_commands, 'serial') and hasattr(arduino_commands.serial, 'reset_input_buffer'):
+        arduino_commands.serial.reset_input_buffer()  # Clear serial buffer
+    else:
+        print("Error: The ArduinoCommands object does not have access to the serial buffer.")
+
