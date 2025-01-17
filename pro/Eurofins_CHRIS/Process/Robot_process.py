@@ -4,126 +4,115 @@ from Controlls.Robot_control import *
 from Controlls.Camera_control import *
 from Controlls.Arduino_control import *
 import time
-
+from Config import SENSOR_TO_GRID_POSITION
 
 def process_samples(self):
-    while True:  # Herhaal het proces continu
-        drying_queue = []  # Houdt bij welke samples drogen
+    drying_queue = []  # Track drying samples
 
-        # Verf en droog samples
-        for rij in range(len(grid)):
-            for kolom in range(len(grid[rij])):
-                if grid[rij][kolom] is not None:
-                    sample = grid[rij][kolom]
-                    coordinates = grid_to_coordinates(rij, kolom)
+    while True:  # Repeat the process continuously
+        # Check each grid position for active samples
+        for sensor_id in range(9):  # Loop through sensor IDs (0 to 8)
+            grid_position = SENSOR_TO_GRID_POSITION.get(sensor_id)
 
-                    langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")
-                    move_robot(coordinates, f"2. Beweging om {sample} op te pakken")
-                    grid[rij][kolom] = None
-                    pick_up(coordinates, f"3. Pakken van {sample} met aanpassing van de grijper",
-                            rij)  # Pass 'rij' here
-                    orintatie_van_gripper(coordinates, f"4. Orintatie van {sample} gripper aanpassing in grid")
-                    er_uit_halen_van_kast(coordinates, f"5. Er uit halen van {sample}")
+            if grid_position:
+                row, col = grid_position
+                sample = grid[row][col]
 
-                    # Foto maken voor verven ------------------------------------------------------------------------------------------------------
-                    move_robot_Photo1(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo2(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo3(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo4(coordinates, f"6.moven voor foto's")
+                if sample and sample.startswith("sample"):  # If sample exists in grid
+                    coordinates = grid_to_coordinates(row, col)
 
-                    # Rele schakelen voor licht
-                    take_photo(sample_base_name="sample",
-                               output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2" f"Photo zonder verf van {sample}")
+                    langzaam_naar_grid(coordinates, f"1. Slowly move to {sample} in grid")
+                    move_robot(coordinates, f"2. Move to pick up {sample}")
+                    pick_up(coordinates, f"3. Pick up {sample} with gripper adjustment", row)
+                    orintatie_van_gripper(coordinates, f"4. Gripper orientation adjustment for {sample}")
+                    er_uit_halen_van_kast(coordinates, f"5. Remove {sample} from the cabinet")
 
-                    # Rele uitschakelen voor licht
-                    move_robot_Photo3(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo2(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo1(coordinates, f"6.moven voor foto's")
+                    # Take photos for painting ------------------------------------------------------------------------------------------------------
+                    move_robot_Photo1(coordinates, f"6. Moving for photos")
+                    move_robot_Photo2(coordinates, f"6. Moving for photos")
+                    move_robot_Photo3(coordinates, f"6. Moving for photos")
+                    move_robot_Photo4(coordinates, f"6. Moving for photos")
 
-                    # Foto voor verven klaar ------------------------------------------------------------------------------------------------------
+                    # Turn on relay for light
+                    take_photo(sample_base_name="sample", output_dir_base=f"Photo without paint of {sample}")
 
-                    # Bewegingen voor het verven ---------------------------------------------------------------------------------------------------
-                    move_robot_verf1(f"7.moven voor verf")
-                    move_robot_verf2(f"7.moven voor verf")
-                    move_robot_verf3(f"7.moven voor verf")
-                    move_robot_verf4(f"7.moven voor verf")
-                    move_robot_verf5(f"7.moven voor verf")
+                    # Turn off relay for light
+                    move_robot_Photo3(coordinates, f"6. Moving for photos")
+                    move_robot_Photo2(coordinates, f"6. Moving for photos")
+                    move_robot_Photo1(coordinates, f"6. Moving for photos")
 
-                    # Servomotor aan
-                    move_robot_verf6(f"7.moven voor verf")
+                    # Painting movements -------------------------------------------------------------------------------------------------------------
+                    move_robot_verf1(f"7. Moving for paint")
+                    move_robot_verf2(f"7. Moving for paint")
+                    move_robot_verf3(f"7. Moving for paint")
+                    move_robot_verf4(f"7. Moving for paint")
+                    move_robot_verf5(f"7. Moving for paint")
 
-                    # Servomotor uit
-                    vervenklaar(f"7.vervenklaar")
-                    move_robot_verf1(f"7.moven voor verf")
+                    # Servo motor on
+                    move_robot_verf6(f"7. Moving for paint")
 
-                    # Klaar met verven -------------------------------------------------------------------------------------------------------------
-                    move_robot_terug(coordinates, f"8. Beweging om {sample} terug te leggen")
-                    het_in_de_kast_leggen(coordinates, f"9. Beweging om {sample} terug te leggen")
-                    orintatie_van_gripper_er_uit(coordinates,
-                                                 f"10. Orintatie van {sample} gripper aanpassing in grid om er uit te gaan")
-                    terug_de_grijper_er_uit(coordinates, f"11. Beweging om grijper van {sample} weg te halen")
-                    grid[rij][kolom] = sample
+                    # Servo motor off
+                    vervenklaar(f"7. Painting done")
+                    move_robot_verf1(f"7. Moving for paint")
 
-                    # Voeg toe aan drooglijst
-                    drying_queue.append((time.time(), rij, kolom, sample))
-                    print(f"{sample} toegevoegd aan drooglijst op {time.strftime('%H:%M:%S')}.")
+                    # Back to storage -------------------------------------------------------------------------------------------------------------
+                    move_robot_terug(coordinates, f"8. Return {sample} to storage")
+                    het_in_de_kast_leggen(coordinates, f"9. Put {sample} in storage")
+                    orintatie_van_gripper_er_uit(coordinates, f"10. Gripper orientation out for {sample}")
+                    terug_de_grijper_er_uit(coordinates, f"11. Remove gripper from {sample}")
 
-        # Wachten tot alles droog is en foto's maken
+                    # Add sample to drying queue
+                    drying_queue.append((time.time(), row, col, sample))
+                    print(f"{sample} added to drying queue at {time.strftime('%H:%M:%S')}.")
+
+        # Wait until all samples are dry
         while drying_queue:
-            drying_queue.sort(key=lambda x: x[0])  # Sorteer op droogtijd
+            drying_queue.sort(key=lambda x: x[0])  # Sort by drying time
 
             current_time = time.time()
             for start_time, r, c, s in drying_queue[:]:
                 elapsed = int(current_time - start_time)
-                if elapsed < 120:  # Controleer droogtijd
-                    print(f"{s} is aan het drogen. Tijd verstreken: {elapsed // 60}m {elapsed % 60}s.")
+                if elapsed < 120:  # Check drying time
+                    print(f"{s} is drying. Time elapsed: {elapsed // 60}m {elapsed % 60}s.")
                 else:
-                    # Sample is droog, verwerk het
+                    # Sample is dry, process it
                     drying_queue.remove((start_time, r, c, s))
-                    print(f"{s} is nu droog en klaar voor foto.")
+                    print(f"{s} is now dry and ready for photo.")
 
-                    # Beweeg naar het sample
+                    # Move to sample
                     coordinates = grid_to_coordinates(r, c)
-                    langzaam_naar_grid(coordinates, f"1. Langzaam naar {s} in grid")
-                    move_robot(coordinates, f"2. Beweging om {s} op te pakken")
-                    pick_up(coordinates, f"3. Pakken van {s} met aanpassing van de grijper",
-                            r)  # Pass 'r' (row index) here
-                    orintatie_van_gripper(coordinates, f"4. Orintatie van {s} gripper aanpassing in grid")
-                    er_uit_halen_van_kast(coordinates, f"5. Er uit halen van {s}")
+                    langzaam_naar_grid(coordinates, f"1. Slowly move to {s} in grid")
+                    move_robot(coordinates, f"2. Move to pick up {s}")
+                    pick_up(coordinates, f"3. Pick up {s} with gripper", r)
+                    orintatie_van_gripper(coordinates, f"4. Gripper orientation adjustment for {s}")
+                    er_uit_halen_van_kast(coordinates, f"5. Remove {s} from cabinet")
 
-                    # Fotografeer het sample
-                    move_robot_Photo1(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo2(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo3(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo4(coordinates, f"6.moven voor foto's")
+                    # Take photos
+                    move_robot_Photo1(coordinates, f"6. Moving for photos")
+                    move_robot_Photo2(coordinates, f"6. Moving for photos")
+                    move_robot_Photo3(coordinates, f"6. Moving for photos")
+                    move_robot_Photo4(coordinates, f"6. Moving for photos")
 
-                    # Rele schakelen voor licht
-                    take_photo(f"Photo met verf in normaal licht van {s}")
+                    # Relay for light on
+                    take_photo(f"Photo with paint under normal light of {s}")
 
-                    # Rele schakelen voor licht uit te zetten
-                    # Fotografeer het sample in uv-----------------------------------------------------------------------
-                    # IO poort 4 aan voor UV
-                    take_photo(f"Photo in uv licht van {s}")
-                    # IO poort 4 uit voor UV licht
-                    move_robot_Photo3(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo2(coordinates, f"6.moven voor foto's")
-                    move_robot_Photo1(coordinates, f"6.moven voor foto's")
+                    # Relay for light off
+                    take_photo(f"Photo in UV light of {s}")
 
-                    # Terug leggen
-                    move_robot_terug(coordinates, f"8. Beweging om {s} terug te leggen")
-                    het_in_de_kast_leggen(coordinates, f"9. Beweging om {s} terug te leggen")
-                    orintatie_van_gripper_er_uit(coordinates,
-                                                 f"10. Orintatie van {s} gripper aanpassing in grid om er uit te gaan")
-                    terug_de_grijper_er_uit(coordinates, f"11. Beweging om grijper van {s} weg te halen")
+                    # Return to storage
+                    move_robot_terug(coordinates, f"8. Return {s} to storage")
+                    het_in_de_kast_leggen(coordinates, f"9. Put {s} in storage")
+                    orintatie_van_gripper_er_uit(coordinates, f"10. Gripper orientation out for {s}")
+                    terug_de_grijper_er_uit(coordinates, f"11. Remove gripper from {s}")
 
-                    # Markeer sample als klaar
-                    grid[r][c] = f"{s} klaar"
+                    # Mark sample as done
+                    grid[r][c] = f"{s} done"
 
-        # Controleer of het grid volledig verwerkt is
-        all_done = all(cell is None or "klaar" in str(cell) for row in grid for cell in row)
+        # Check if the grid is fully processed
+        all_done = all(cell is None or "done" in str(cell) for row in grid for cell in row)
         if all_done:
-            print("Alle samples zijn verwerkt. Start een nieuwe cyclus.")
+            print("All samples processed. Starting a new cycle.")
         else:
-            print("Nog niet alle samples zijn verwerkt.")
+            print("Not all samples are processed.")
 
-        time.sleep(5)  # Pauzeer kort voordat je opnieuw begint
+        time.sleep(5)  # Pause briefly before starting again
