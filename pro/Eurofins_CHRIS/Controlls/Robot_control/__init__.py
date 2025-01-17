@@ -16,6 +16,13 @@ from .Movement import (
     move_robot_Photo1,
     move_robot_Photo2,
     move_robot_Photo3,
-    move_robot_Photo4
+    move_robot_Photo4,
+    move_robot_verf1,
+    move_robot_verf2,
+    move_robot_verf3,
+    move_robot_verf4,
+    move_robot_verf5,
+    move_robot_verf6,
+    vervenklaar
 )
 from .Robot_grid import grid, grid_to_coordinates

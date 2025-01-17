@@ -42,5 +42,12 @@ from .Robot_control import (
     move_robot_Photo3,
     move_robot_Photo4,
     grid,
-    grid_to_coordinates
+    grid_to_coordinates,
+    move_robot_verf1,
+    move_robot_verf2,
+    move_robot_verf3,
+    move_robot_verf4,
+    move_robot_verf5,
+    move_robot_verf6,
+    vervenklaar
 )
