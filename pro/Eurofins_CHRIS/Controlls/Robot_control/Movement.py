@@ -35,7 +35,7 @@ def move_robot_terug(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(5)
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ def orintatie_van_gripper(coordinates, message=""):
     x, y, z = coordinates
     x_pickup = x - 0.504
     z_pickup = z + 0.004
-    orientation = [-2.14, -2.204, 0.01759]
+    orientation = [-2.09, -2.15, 0.14]
     speed = 0.8
     acceleration = 0.5
     command = (
@@ -96,19 +96,19 @@ def langzaam_naar_grid(coordinates, message=""):
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # de grijper van de robot veranderen voor een goede beet 666
 def pick_up(coordinates, rij, message=""):
-    # Ensure rij is converted to an integer (or float) if it's a string
-    try:
-        print(f"rij test = {rij} \n")
-        rij = float(rij)  # Convert rij to a float to handle the calculation correctly
-        print(f"rij float= {rij} ")
-    except ValueError:
-        print(f"Error: Unable to convert rij value {rij} to a float.")
-        return
+    # Ensure rij is valid
+    if not isinstance(rij, (int, float)):
+        try:
+            rij = float(rij)
+        except (ValueError, TypeError):
+            print(f"Error: Invalid rij value '{rij}' provided to pick_up().")
+            return
+
+    print(f"rij (validated) = {rij}")
 
     x, y, z = coordinates
     x_pickup = x - 0.501
     y_pickup = y - 0.015
-    # Ensure the calculation of z_pickup works correctly
     z_pickup = z - 0.001 * rij ** 2 + 0.0040 * rij - 0.0025
     orientation = [2.146, 2.1312, 0.1372]
     speed = 0.4
@@ -121,6 +121,7 @@ def pick_up(coordinates, rij, message=""):
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(5)
+
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -291,7 +292,7 @@ def move_robot_verf1(verf_punt1, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(5)
+    time.sleep(20)
 
 
 def move_robot_verf2(verf_punt2, message=""):
@@ -306,7 +307,7 @@ def move_robot_verf2(verf_punt2, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(5)
+    time.sleep(20)
 
 
 
