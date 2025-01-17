@@ -28,6 +28,13 @@ from Controlls import (
     move_robot_Photo2,
     move_robot_Photo3,
     move_robot_Photo4,
+    move_robot_verf1,
+    move_robot_verf2,
+    move_robot_verf3,
+    move_robot_verf4,
+    move_robot_verf5,
+    move_robot_verf6,
+    vervenklaar,
     EurofinsGUI
 )
 from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP
@@ -125,7 +132,7 @@ def testmain():
 if __name__ == "__main__":
     setup_arduino()
     setup_robot()
-    testmain()
+    #testmain()
     root = tk.Tk()
     gui = EurofinsGUI(root)
     root.mainloop()
