@@ -15,7 +15,7 @@ def process_samples(self):
                 if grid[rij][kolom] is not None:
                     sample = grid[rij][kolom]
                     coordinates = grid_to_coordinates(rij, kolom)
-
+                    """
                     # Pak en verf het sample
                     langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")
                     move_robot(coordinates, f"2. Beweging om {sample} op te pakken")
@@ -30,8 +30,9 @@ def process_samples(self):
                     move_robot_Photo4(coordinates, f"6.moven voor fotos")
                     # move_robot_Verf(f"6. Beweging om {sample} te verven")
                     # rele schakelen voor licth
+                    """
                     take_photo(sample_base_name="sample",
-                               output_dir_base="C:\\Users\\...\\Desktop\\Smr 2"f"Foto zonder verf van {sample}")
+                               output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2"f"Foto zonder verf van {sample}")
                     # rele uitschakelen voor licth
                     move_robot_Photo3(coordinates, f"6.moven voor fotos")
                     move_robot_Photo2(coordinates, f"6.moven voor fotos")

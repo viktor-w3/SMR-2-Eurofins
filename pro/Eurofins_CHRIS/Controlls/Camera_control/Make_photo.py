@@ -1,13 +1,11 @@
 # Controlls/Camera_control/Make_photo.py
-
 import os
 from .Camera_module_2 import CameraHandler  # Use CameraHandler from the Camera_control module
 
 # Global photo counter (this can be better handled through a class or function arguments)
 photo_counter = 0
 
-
-def take_photo(sample_base_name="sample", output_dir_base="C:\\Users\\...\\Desktop\\Smr 2"):
+def take_photo(sample_base_name="sample", output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2"):
     """
     Takes a photo, saves it with a unique name, and organizes it into directories.
 
