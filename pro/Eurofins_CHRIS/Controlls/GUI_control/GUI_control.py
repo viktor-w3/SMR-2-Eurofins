@@ -125,7 +125,7 @@ class EurofinsGUI:
         process_samples(self.mux_status)  # Pass mux_status to process_samples function
 
     def open_folder(self):
-        folder_path = r"C:\Users\...\Desktop\Smr 2"
+        folder_path = r"C:\Users\Denri\Desktop\Smr 2"
         if os.path.exists(folder_path):
             subprocess.Popen(f'explorer "{folder_path}"')
         else:
