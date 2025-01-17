@@ -9,7 +9,8 @@ class MuxControl:
     def read_mux_channel(self, mux_number, channel_number):
         """Read the status of a specific channel in the multiplexer."""
         command = f"read_mux_channel {mux_number} {channel_number}"
-        self.connection.send_command(command)
+        response = self.connection.send_command(command)  # This now returns the response
+        return response  # Return the response (e.g., '1' or '0')
 
     def set_mux_channel(self, mux_number, channel_number):
         """Send command to select a multiplexer channel."""

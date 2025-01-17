@@ -3,6 +3,7 @@
 from Controlls.Robot_control import *
 from Controlls.Camera_control import *
 from Controlls.Arduino_control import *
+import time
 
 def process_samples(self):
     while True:  # Herhaal het proces continu
