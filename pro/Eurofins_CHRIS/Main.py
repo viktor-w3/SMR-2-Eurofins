@@ -30,7 +30,7 @@ from Controlls import (
     move_robot_Photo4,
     EurofinsGUI
 )
-
+from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP
 from Process import process_samples
 
 def setup_arduino():
@@ -62,11 +62,11 @@ def setup_robot():
 
 def run_for_next_minute(mux_tracker):
     start_time = time.time()  # Record the start time
-    end_time = start_time + 60  # End time after 60 seconds
+    end_time = start_time + 10  # End time after 60 seconds
 
     while time.time() < end_time:  # Continue until 60 seconds have passed
         mux_tracker.monitor_mux_and_control_leds()  # Call your method here
-
+        time.sleep(0.5)
 
 def testmain():
     print("Starting the program...")
@@ -74,6 +74,8 @@ def testmain():
     # Set up Arduino commands and LED control
     led_control, arduino_commands, servo_control, mux_control  = setup_arduino()
 
+    # Instantiate the MuxStatusTracker with mux_control and led_control
+    mux_tracker = MuxStatusTracker(mux_control, led_control, SENSOR_TO_MUX_CHANNEL,SENSOR_TO_LED_STRIP)
     # Pause for initialization
     time.sleep(0.3)
 
@@ -82,7 +84,7 @@ def testmain():
 
     time.sleep(0.3)
     deactivate_io_port(4)
-
+    """
     # LED control and effects
     led_control.set_all_leds("Red")
     time.sleep(0.3)
@@ -110,11 +112,7 @@ def testmain():
     led_control.set_all_leds("White")
     clear_buffer(arduino_commands)
     servo_control.servo_off()
-
-
-    # Instantiate the MuxStatusTracker with mux_control and led_control
-    mux_tracker = MuxStatusTracker(mux_control, led_control)
-
+    """
     # Monitor MUX and control LEDs based on the status
     run_for_next_minute(mux_tracker)
 

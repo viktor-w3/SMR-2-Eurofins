@@ -1,5 +1,4 @@
 # Controlls/Arduino_control/Connection.py
-
 import serial
 import time
 
@@ -24,15 +23,21 @@ class ArduinoConnection:
         self.serial_connection.write(full_command.encode())
         time.sleep(0.2)  # Give Arduino time to process the command
 
-        while True:
-            response = self.serial_connection.readline().decode().strip()
-            if response:  # If there is any response
-                print(f"Arduino: {response}")
-                if response == "done":
-                    return response  # Return the response if it's done (or you could handle specific responses as needed)
-                return response  # Return non-"done" responses directly (e.g., sensor status)
+        # Read the response once, and handle it
+        response = self.read_response()
+        if response:
+            print(f"Arduino: {response}")
+            if response == "done":
+                return response  # Return "done" if Arduino confirms completion
+            return response  # Return the sensor status or other responses directly
+        return None  # If no response, return None
 
     def read_response(self):
         """Read the response from Arduino."""
-        return self.serial_connection.readline().decode().strip()
+        response = self.serial_connection.readline().decode().strip()
+        return response if response else None  # Return None if no valid response
 
+    def clear_buffer(self):
+        """Clear the serial buffer to ensure no stale data."""
+        while self.serial_connection.in_waiting > 0:
+            self.serial_connection.readline()
