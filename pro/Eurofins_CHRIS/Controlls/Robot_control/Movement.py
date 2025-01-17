@@ -98,7 +98,9 @@ def langzaam_naar_grid(coordinates, message=""):
 def pick_up(coordinates, rij, message=""):
     # Ensure rij is converted to an integer (or float) if it's a string
     try:
+        print(f"rij test = {rij} \n")
         rij = float(rij)  # Convert rij to a float to handle the calculation correctly
+        print(f"rij float= {rij} ")
     except ValueError:
         print(f"Error: Unable to convert rij value {rij} to a float.")
         return

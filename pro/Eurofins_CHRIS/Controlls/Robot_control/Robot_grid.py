@@ -6,7 +6,6 @@ grid = [
     [None, None, None],
     [None, None, None]
 ]
-grid[2][0] = "sample1"
 
 # Functie om grid-positie naar coördinaten te converteren
 def grid_to_coordinates(rij, kolom):

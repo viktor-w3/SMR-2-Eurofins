@@ -132,7 +132,7 @@ def testmain():
 if __name__ == "__main__":
     setup_arduino()
     setup_robot()
-    #testmain()
+    testmain()
     root = tk.Tk()
     gui = EurofinsGUI(root)
     root.mainloop()
