@@ -1,11 +1,11 @@
 # Controlls/GUI_control/GUI_control.py
+
 import tkinter as tk
 from tkinter import ttk
 import threading
+from Process.Robot_process import process_samples  # Import process_samples
 import os
 import subprocess
-from Process.Robot_process import process_samples  # Import your function here
-
 
 class EurofinsGUI:
     def __init__(self, root):
@@ -13,8 +13,6 @@ class EurofinsGUI:
         self.root = root
         self.root.title("Eurofins GUI SMR2")
         self.running = False
-        self.mux_status = [False] * 9  # Store MUX sensor status (9 sensors for example)
-
         # Set background color
         self.root.configure(bg="gray")
 
@@ -122,7 +120,7 @@ class EurofinsGUI:
         threading.Thread(target=self.start_process_samples, daemon=True).start()
 
     def start_process_samples(self):
-        process_samples(self.mux_status)  # Pass mux_status to process_samples function
+        process_samples()  # Call the imported process_samples function
 
     def open_folder(self):
         folder_path = r"C:\Users\...\Desktop\Smr 2"
@@ -130,10 +128,3 @@ class EurofinsGUI:
             subprocess.Popen(f'explorer "{folder_path}"')
         else:
             print(f"De map {folder_path} bestaat niet.")
-
-    def update_mux_status(self):
-        # Update the grid based on the current mux_status
-        for idx, status in enumerate(self.mux_status):
-            color = "green" if status else "red"
-            row, col = divmod(idx, 3)  # Calculate the grid position (3x3)
-            self.lampjes[row][col].config(bg=color)  # Update the color
