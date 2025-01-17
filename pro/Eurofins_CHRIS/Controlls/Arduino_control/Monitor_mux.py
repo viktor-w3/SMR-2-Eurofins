@@ -2,7 +2,8 @@
 
 from .Mux_control import MuxControl
 from .Led_control import LEDControl
-from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP
+from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP, SENSOR_TO_GRID_POSITION
+from Controlls.Robot_control.Robot_grid import grid  # Import grid from Robot_grid.py
 
 class MuxStatusTracker:
     def __init__(self, mux_control, led_control, sensor_to_mux_channel, sensor_to_led_strip):
@@ -11,10 +12,14 @@ class MuxStatusTracker:
         self.sensor_to_mux_channel = sensor_to_mux_channel
         self.sensor_to_led_strip = sensor_to_led_strip
 
+    def sensor_to_grid_position(self, sensor_id):
+        return SENSOR_TO_GRID_POSITION.get(sensor_id)
+
     def monitor_mux_and_control_leds(self):
         """
         Monitor multiplexer channels and control LEDs based on the sensor status.
         Each sensor is checked 5 times, and the LED status is updated only if the sensor is HIGH most of the time.
+        Also, updates the grid based on sensor activity.
         """
         for sensor_id in SENSOR_TO_MUX_CHANNEL:
             mux_number, channel_number = SENSOR_TO_MUX_CHANNEL[sensor_id]
@@ -28,7 +33,7 @@ class MuxStatusTracker:
 
             # Determine the majority vote
             high_count = sum(status_votes)
-            is_active = high_count >= 2  # HIGH must occur at least 3 times to be considered active
+            is_active = high_count >= 2  # HIGH must occur at least 2 times to be considered active
 
             # Get LED strip indices
             strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
@@ -39,5 +44,17 @@ class MuxStatusTracker:
             # Update LED status based on the majority vote
             if is_active:
                 self.led_control.set_led_range(strip_index, start_index, end_index, "Green")
+
+                # Update the grid with the detected sample
+                grid_position = self.sensor_to_grid_position(sensor_id)
+                if grid_position:
+                    row, col = grid_position
+                    grid[row][col] = f"sample{sensor_id}"  # Assign the sample name
             else:
                 self.led_control.set_led_range(strip_index, start_index, end_index, "Red")
+
+                # Clear the grid position if the sensor is not active
+                grid_position = self.sensor_to_grid_position(sensor_id)
+                if grid_position:
+                    row, col = grid_position
+                    grid[row][col] = None  # Clear the grid cell if the sensor is inactive
