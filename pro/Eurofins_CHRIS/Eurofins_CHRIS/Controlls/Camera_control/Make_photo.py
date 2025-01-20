@@ -69,27 +69,31 @@ def take_photo(sample_base_name="sample", output_dir_base="C:\\Users\\...\\Deskt
     global photo_counter
     photo_counter += 1  # Increment the photo counter
 
+    # Ensure the base output directory exists
+    if not os.path.exists(output_dir_base):
+        os.makedirs(output_dir_base)
+
     # Calculate the sample number based on the photo counter
     sample_number = (photo_counter - 1) // 3 + 1
     sample_name = f"{sample_base_name}{sample_number}"
 
-    # Define the output directory where photos will be stored
-    output_dir = os.path.join(output_dir_base, sample_name)
+    # Define the output directory for the current sample
+    sample_dir = os.path.join(output_dir_base, sample_name)
 
-    # Ensure that the output directory exists
-    os.makedirs(output_dir, exist_ok=True)
+    # Ensure the sample directory exists
+    os.makedirs(sample_dir, exist_ok=True)
 
     # Define the photo name and full path
     photo_name = f"{sample_name}_photo{photo_counter}.jpg"
-    photo_path = os.path.join(output_dir, photo_name)
+    photo_path = os.path.join(sample_dir, photo_name)
 
     # Try to create the photo using CameraHandler
     try:
-        # Create the CameraHandler instance
-        camera_handler = CameraHandler(output_dir=output_dir)
+        # Assuming CameraHandler is a class defined elsewhere to handle camera operations
+        camera_handler = CameraHandler(output_dir=sample_dir)  # Initialize with the sample directory
 
         # Capture the photo (CameraHandler will save it with the right name)
-        camera_handler.capture_photo(photo_name)  # Specify only the photo name (CameraHandler handles directory)
+        camera_handler.capture_photo(photo_name)
         camera_handler.release_camera()  # Release the camera once done
 
         print(f"Photo saved: {photo_path}")

@@ -29,6 +29,10 @@ def process_samples(self):
                 print(f"Processing {sample} at grid[{rij}][{kolom}]...")
                 coordinates = grid_to_coordinates(rij, kolom)
 
+                #
+                # grid controleren op sampel
+                #
+
                 langzaam_naar_grid(coordinates, f"1. Slowly move to {sample} in grid")
                 move_robot(coordinates, f"2. Move to pick up {sample}")
                 pick_up(coordinates, rij, f"3. Pick up {sample} with gripper adjustment")
@@ -39,31 +43,39 @@ def process_samples(self):
                 move_robot_Photo2(coordinates, f"6.moven voor fotos")
                 move_robot_Photo3(coordinates, f"6.moven voor fotos")
                 move_robot_Photo4(coordinates, f"6.moven voor fotos")
-                # rele schakelen voor licth
-                take_photo(sample_base_name="sample",
-                           output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2"f"Photo zonder verf van {sample}")
-                # rele uitschakelen voor licth
+                
+                led_control.set_led_range(3, 0, 29, "White")
+                take_photo(sample_base_name="sample", output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2"f"Photo zonder verf van {sample}")
+                led_control.set_led_range(3, 0, 29, "lBack")
+                
                 move_robot_Photo3(coordinates, f"6.moven voor fotos")
                 move_robot_Photo2(coordinates, f"6.moven voor fotos")
                 move_robot_Photo1(coordinates, f"6.moven voor fotos")
                 # fotot voor verven klaar------------------------------------------------------------------------------------------------------
+                move_photo_en_verf_punt()
                 # bewegingen voor het verven---------------------------------------------------------------------------------------------------
                 move_robot_verf1(f"7.moven voor fotos")
                 move_robot_verf2(f"7.moven voor fotos")
                 move_robot_verf3(f"7.moven voor fotos")
                 move_robot_verf4(f"7.moven voor fotos")
                 move_robot_verf5(f"7.moven voor fotos")
-                # servomoter aan
+                
+                servo_control.initialize_servo()
                 move_robot_verf6(f"7.moven voor fotos")
-                # servomotor uit
+                servo_control.servo_off()
+
                 vervenklaar(f"7.vervenklaar")
                 move_robot_verf1(f"7.moven voor fotos")
                 # klaar met verven-------------------------------------------------------------------------------------------------------------
                 move_robot_terug(coordinates, f"8. Beweging om {sample} terug te leggen")
                 het_in_de_kast_leggen(coordinates, f"9. Beweging om {sample} terug te leggen")
-                orintatie_van_gripper_er_uit(coordinates,
-                                             f"10. Orintatie van {sample} gripper aanpassing in grid om er uit te gaan")
+                orintatie_van_gripper_er_uit(coordinates, f"10. Orintatie van {sample} gripper aanpassing in grid om er uit te gaan")
                 terug_de_grijper_er_uit(coordinates, f"11. Beweging om grijper van {sample} weg te halen")
+
+                #
+                # grid controleren op sampel
+                #
+
 
                 # Add to drying queue
                 drying_queue.append((time.time(), rij, kolom, sample))
@@ -97,10 +109,15 @@ def process_samples(self):
                     move_robot_Photo4(coordinates, f"6. Moving for photos")
 
                     # Relay for light on
+                    led_control.set_led_range(3, 0, 29, "White")
                     take_photo(f"Photo with paint under normal light of {s}")
-
+                    led_control.set_led_range(3, 0, 29, "Black")
                     # Relay for light off
+                    
+                    #uv foto
+                    io_ports_init(4)
                     take_photo(f"Photo in UV light of {s}")
+                    deactivate_io_port(4)
 
                     # Return to storage
                     move_robot_terug(coordinates, f"8. Return {s} to storage")
@@ -110,6 +127,10 @@ def process_samples(self):
 
                     # Mark sample as done
                     grid[r][c] = f"{s} done"
+
+                    #
+                    # grid controleren op sampel
+                    #
 
         # Check if the grid is fully processed
         all_done = all(cell is None or "done" in str(cell) for row in grid for cell in row)

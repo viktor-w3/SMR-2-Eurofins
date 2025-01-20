@@ -600,6 +600,21 @@ def move_robot_Photo4(photo_punt4, message=""):
     print(f"Robot antwoord: {response}")
     time.sleep(20)
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
+def move_photo_en_verf_punt( message=""):
+    x_pickup = -0.293
+    y_pickup = 0.00153 
+    z_pickup = 0.164
+    orientation = [-1.87, -1.78, 0.75]
+    speed = 0.08
+    acceleration = 0.05
+    command = (
+        f"movel(p[{x_pickup}, {y_pickup}, {z_pickup}, {orientation[0]}, {orientation[1]}, {orientation[2]}], "
+        f"a={acceleration}, v={speed})\n"
+    )
+    print(f"{message}: {command.strip()}")
+    response = send_urscript_command(command)
+    print(f"Robot antwoord: {response}")
+    time.sleep(20)
 # bewegen in de foto box
 def move_robot_verf1(verf_punt1, message=""):
     verf_punt1 = [-0.159, 0.193, 0.112]
