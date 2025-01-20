@@ -45,16 +45,19 @@ class MuxStatusTracker:
             if is_active:
                 self.led_control.set_led_range(strip_index, start_index, end_index, "Green")
 
-                # Update the grid with the detected sample
-                grid_position = self.sensor_to_grid_position(sensor_id)
-                if grid_position:
-                    row, col = grid_position
-                    grid[row][col] = f"sample{sensor_id}"  # Assign the sample name
-            else:
-                self.led_control.set_led_range(strip_index, start_index, end_index, "Red")
-
                 # Clear the grid position if the sensor is not active
                 grid_position = self.sensor_to_grid_position(sensor_id)
                 if grid_position:
-                    row, col = grid_position
-                    grid[row][col] = None  # Clear the grid cell if the sensor is inactive
+                    rij, kolom = grid_position
+                    grid[rij][kolom] = None  # Clear the grid cell if the sensor is inactive
+            else:
+                self.led_control.set_led_range(strip_index, start_index, end_index, "Red")
+
+                # Update the grid with the detected sample
+                grid_position = self.sensor_to_grid_position(sensor_id)
+                if grid_position:
+                    rij, kolom = grid_position
+                    grid[rij][kolom] = f"sample{sensor_id}"  # Assign the sample name
+
+
+
