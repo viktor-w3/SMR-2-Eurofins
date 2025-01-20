@@ -35,6 +35,7 @@ def process_samples(self):
                     move_robot_Photo2(coordinates, f"6.moven voor fotos") 
                     move_robot_Photo1(coordinates, f"6.moven voor fotos")
                     #fotot voor verven klaar------------------------------------------------------------------------------------------------------
+                    move_photo_en_verf_punt()
                     #bewegingen voor het verven---------------------------------------------------------------------------------------------------
                     move_robot_verf1(f"7.moven voor fotos")
                     move_robot_verf2(f"7.moven voor fotos")
