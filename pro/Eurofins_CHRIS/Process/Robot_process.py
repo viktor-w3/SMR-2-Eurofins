@@ -8,16 +8,15 @@ from Controlls.Robot_control.Robot_grid import grid
 from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP
 from Controlls.Arduino_control.Command import ArduinoCommands
 from Controlls.Robot_control import IO_commands
+from Controlls.Arduino_control.Led_control import LEDControl
 
 import time
 from Config import SENSOR_TO_GRID_POSITION
 
-from Controlls.Arduino_control.Led_control import LEDControl
-
 
 def process_samples(arduino_connection,gui, running):
     """Process samples by monitoring MUX channels and controlling LEDs."""
-
+    print("Process started.")
     # Create ArduinoCommands instance using the existing arduino_connection
     arduino_commands = ArduinoCommands(arduino_connection)
     io_commands = IO_commands
@@ -49,7 +48,8 @@ def process_samples(arduino_connection,gui, running):
 
     while running:
         # Check each sensor and process the sample
-        mux_tracker.run_for_next_minute()  # Assuming this method processes the MUX channels
+        print("Process runnn.")
+        mux_tracker.run_for_next_minute(gui)  # Assuming this method processes the MUX channels
         for sensor_id in range(9):
             grid_position = SENSOR_TO_GRID_POSITION.get(sensor_id)
             gui.update_sensor_status(sensor_id, "green")
@@ -94,9 +94,9 @@ def process_samples(arduino_connection,gui, running):
                 move_robot_verf4(f"7.moven voor fotos")
                 move_robot_verf5(f"7.moven voor fotos")
 
-                io_commands.activate_io_port(5)          #arduino_commands.servo_on()# servomoter aan
+                #io_commands.activate_io_port(5)          #arduino_commands.servo_on()# servomoter aan
                 move_robot_verf6(f"7.moven voor fotos")
-                io_commands.deactivate_io_port(5)        #arduino_commands.servo_off()# servomotor uit
+                #io_commands.deactivate_io_port(5)        #arduino_commands.servo_off()# servomotor uit
 
                 vervenklaar(f"7.vervenklaar")
                 move_robot_verf1(f"7.moven voor fotos")
@@ -119,7 +119,7 @@ def process_samples(arduino_connection,gui, running):
                 print(f"{sample} toegevoegd aan drooglijst op {time.strftime('%H:%M:%S')}.")
                 # Wachten tot alles droog is en foto's maken
 
-                mux_tracker.run_for_next_minute()
+                mux_tracker.run_for_next_minute(gui)
                 grid[rij][kolom] = sample
 
     while drying_queue:
@@ -178,7 +178,7 @@ def process_samples(arduino_connection,gui, running):
                 # Markeer sample als klaar
                 grid[rij][kolom] = f"{sample} klaar"
 
-                mux_tracker.run_for_next_minute()
+                mux_tracker.run_for_next_minute(gui)
                 gui.update_sensor_status(sensor_id, "green")
 
                 grid[rij][kolom] = sample

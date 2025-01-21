@@ -4,7 +4,6 @@ from threading import Thread
 from Process import process_samples  # Import the process function from Robot_process
 from Config import SENSOR_TO_GRID_POSITION
 
-
 class EurofinsGUI:
     def __init__(self, root, arduino_connection):
         self.root = root
@@ -23,11 +22,11 @@ class EurofinsGUI:
 
         self.grid_cells = {}  # Dictionary to hold grid cells
 
-        for row in range(3):  # Assuming a 3x3 grid
-            for col in range(3):
-                cell = tk.Label(self.grid_frame, text=f"({row},{col})", width=10, height=4, relief="solid", bg="white")
-                cell.grid(row=row, column=col, padx=5, pady=5)
-                self.grid_cells[(row, col)] = cell
+        for rij in range(3):  # Assuming a 3x3 grid
+            for kolom in range(3):
+                cell = tk.Label(self.grid_frame, text=f"({rij},{kolom})", width=10, height=4, relief="solid", bg="white")
+                cell.grid(row=rij, column=kolom, padx=5, pady=5)
+                self.grid_cells[(rij, kolom)] = cell
 
         self.process_thread = None
         self.running = False
@@ -78,8 +77,8 @@ class EurofinsGUI:
         def update():
             """Update grid cells with colors."""
             if grid_data:
-                for position, color in grid_data.items():
-                    cell = self.grid_cells.get(position)
+                for (rij, kolom), color in grid_data.items():
+                    cell = self.grid_cells.get((rij, kolom))  # Use 'rij' and 'kolom' as keys
                     if cell:
                         cell.config(bg=color)
             else:
@@ -94,4 +93,5 @@ class EurofinsGUI:
         """Update a single sensor's status"""
         grid_position = SENSOR_TO_GRID_POSITION.get(sensor_id)
         if grid_position:
-            self.update_grid({grid_position: status})
+            rij, kolom = grid_position  # Using 'rij' and 'kolom'
+            self.update_grid({(rij, kolom): status})
