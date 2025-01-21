@@ -17,6 +17,7 @@ from .Movement import (
     move_robot_Photo2,
     move_robot_Photo3,
     move_robot_Photo4,
+    move_photo_en_verf_punt,
     move_robot_verf1,
     move_robot_verf2,
     move_robot_verf3,

@@ -7,6 +7,7 @@ class MuxControl:
     def __init__(self, connection: ArduinoConnection):
         self.connection = connection  # Using 'connection' instead of 'arduino_connection'
 
+
     def read_mux_channel(self, mux_number, channel_number):
         """Reads the status of a specific channel in a multiplexer."""
         # Clear the serial buffer to avoid stale data

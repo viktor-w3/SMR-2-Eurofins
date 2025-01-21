@@ -5,7 +5,7 @@ import time
 
 
 class CameraHandler:
-    def __init__(self, output_dir="C:\\Users\\Denri\\Desktop\\Smr 2"):
+    def __init__(self, output_dir="C:\\Users\\Denri\\Desktop\\Smr 2\\"):
         """
         Initializes the CameraHandler object. Opens the camera and sets up the output directory for photos.
 

@@ -2,52 +2,86 @@
 
 from Controlls.Robot_control import *
 from Controlls.Camera_control import *
-from Controlls.Arduino_control import *
+from Controlls.Arduino_control.Monitor_mux import MuxStatusTracker
+from Controlls.Arduino_control.Mux_control import MuxControl
+from Controlls.Robot_control.Robot_grid import grid
+from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP
+from Controlls.Arduino_control.Command import ArduinoCommands
+from Controlls.Robot_control import IO_commands
+
 import time
 from Config import SENSOR_TO_GRID_POSITION
 
-def process_samples(self):
+from Controlls.Arduino_control.Led_control import LEDControl
+
+
+def process_samples(arduino_connection,gui, running):
+    """Process samples by monitoring MUX channels and controlling LEDs."""
+
+    # Create ArduinoCommands instance using the existing arduino_connection
+    arduino_commands = ArduinoCommands(arduino_connection)
+    io_commands = IO_commands
+
+    # Create MuxControl and LEDControl using the ArduinoCommands instance
+    mux_control = MuxControl(arduino_connection)  # MuxControl will use the connection to communicate with Arduino
+    led_control = LEDControl(arduino_commands)  # LEDControl will use ArduinoCommands to send LED commands
+
+    io_commands.io_ports_init()
+    print(f"Initialize all IO ports")
+    io_commands.io_activate_all()
+    print(f"Turn all IO ports ON")
+    io_commands.deactivate_io_port(4)
+    print(f"Turn IO port 4 OFF")
+
+    # Initialize LEDs via ArduinoCommands
+    arduino_commands.initialize_leds()
+    arduino_commands.initialize_servo()
+
+    # Now handle the MUX channels and LEDs monitoring
+    mux_tracker = MuxStatusTracker(
+        mux_control=mux_control,
+        led_control=led_control,
+        sensor_to_mux_channel=SENSOR_TO_MUX_CHANNEL,
+        sensor_to_led_strip=SENSOR_TO_LED_STRIP
+    )
+
     drying_queue = []  # Track drying samples
 
-    while True:
-        # Check each sensor
+    while running:
+        # Check each sensor and process the sample
+        mux_tracker.run_for_next_minute()  # Assuming this method processes the MUX channels
         for sensor_id in range(9):
             grid_position = SENSOR_TO_GRID_POSITION.get(sensor_id)
-
+            gui.update_sensor_status(sensor_id, "green")
             if not grid_position:
-                print(f"Sensor ID {sensor_id} is not mapped.")
                 continue
 
             rij, kolom = grid_position
-            try:
-                sample = grid[rij][kolom]
-            except IndexError:
-                print(f"Invalid grid position: rij={rij}, kolom={kolom}. Skipping.")
-                continue
+            sample = grid[rij][kolom]
 
             if sample and sample.startswith("sample"):
                 print(f"Processing {sample} at grid[{rij}][{kolom}]...")
+
+                gui.update_sensor_status(sensor_id, "orange")
                 coordinates = grid_to_coordinates(rij, kolom)
 
-                #
-                # grid controleren op sampel
-                #
-
-                langzaam_naar_grid(coordinates, f"1. Slowly move to {sample} in grid")
-                move_robot(coordinates, f"2. Move to pick up {sample}")
-                pick_up(coordinates, rij, f"3. Pick up {sample} with gripper adjustment")
-                orintatie_van_gripper(coordinates, f"4. Adjust gripper for {sample}")
-                er_uit_halen_van_kast(coordinates, f"5. Remove {sample} from cabinet")
+                langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")
+                move_robot(coordinates, f"2. Beweging om {sample} op te pakken")
+                grid[rij][kolom] = None
+                pick_up(coordinates, f"3. Pakken van {sample} met aanpasingven van de grijper")
+                orintatie_van_gripper(coordinates, f"4. Orintatie van {sample} gripper aanpassing in grid")
+                er_uit_halen_van_kast(coordinates, f"5. er uit halen van {sample}")
                 # photo maken voor verven------------------------------------------------------------------------------------------------------
                 move_robot_Photo1(coordinates, f"6.moven voor fotos")
                 move_robot_Photo2(coordinates, f"6.moven voor fotos")
                 move_robot_Photo3(coordinates, f"6.moven voor fotos")
                 move_robot_Photo4(coordinates, f"6.moven voor fotos")
-                
-                led_control.set_led_range(3, 0, 29, "White")
-                take_photo(sample_base_name="sample", output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2"f"Photo zonder verf van {sample}")
-                led_control.set_led_range(3, 0, 29, "lBack")
-                
+
+                led_control.set_led_range(3, 0, 29, "White") # LEDstrip 3 aan
+                take_photo(sample_base_name="sample",
+                           output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2"f"Photo zonder verf van {sample}")
+                led_control.set_led_range(3, 0, 29, "Black") # LEDstrip 3 uit # LED 3 uit
+
                 move_robot_Photo3(coordinates, f"6.moven voor fotos")
                 move_robot_Photo2(coordinates, f"6.moven voor fotos")
                 move_robot_Photo1(coordinates, f"6.moven voor fotos")
@@ -59,84 +93,100 @@ def process_samples(self):
                 move_robot_verf3(f"7.moven voor fotos")
                 move_robot_verf4(f"7.moven voor fotos")
                 move_robot_verf5(f"7.moven voor fotos")
-                
-                servo_control.initialize_servo()
+
+                io_commands.activate_io_port(5)          #arduino_commands.servo_on()# servomoter aan
                 move_robot_verf6(f"7.moven voor fotos")
-                servo_control.servo_off()
+                io_commands.deactivate_io_port(5)        #arduino_commands.servo_off()# servomotor uit
 
                 vervenklaar(f"7.vervenklaar")
                 move_robot_verf1(f"7.moven voor fotos")
                 # klaar met verven-------------------------------------------------------------------------------------------------------------
                 move_robot_terug(coordinates, f"8. Beweging om {sample} terug te leggen")
                 het_in_de_kast_leggen(coordinates, f"9. Beweging om {sample} terug te leggen")
-                orintatie_van_gripper_er_uit(coordinates, f"10. Orintatie van {sample} gripper aanpassing in grid om er uit te gaan")
+                orintatie_van_gripper_er_uit(coordinates,
+                                             f"10. Orintatie van {sample} gripper aanpassing in grid om er uit te gaan")
+                terug_de_grijper_er_uit(coordinates, f"11. Beweging om grijper van {sample} weg te halen")
+                #grid update--------
+
+
+                # Voeg toe aan drooglijst
+                drying_queue.append((time.time(), rij, kolom, sample))
+
+                strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
+                led_control.load_bar_range("Orange", 120, strip_index, start_index, end_index)
+
+                gui.update_sensor_status(sensor_id, "Orange")
+                print(f"{sample} toegevoegd aan drooglijst op {time.strftime('%H:%M:%S')}.")
+                # Wachten tot alles droog is en foto's maken
+
+                mux_tracker.run_for_next_minute()
+                grid[rij][kolom] = sample
+
+    while drying_queue:
+        drying_queue.sort(key=lambda x: x[0])  # Sorteer op droogtijd
+
+        current_time = time.time()
+        for drying_start_time, rij, kolom, sample, sensor_id in drying_queue[:]:
+            elapsed_time = int(current_time - drying_start_time)
+            if elapsed_time < 120:
+                # Update the drying load bar progress
+                progress = int((elapsed_time / 120) * 30)  # 30 LEDs total for the load bar
+                strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
+                led_control.load_bar_range("Orange", elapsed_time, strip_index, start_index, start_index + progress)
+
+                print(f"{sample} is drying. Time elapsed: {elapsed_time // 60}m {elapsed_time % 60}s.")
+            else:
+                # Drying is complete, finish processing the sample
+                print(drying_queue)
+                drying_queue.remove((drying_start_time, rij, kolom, sample, sensor_id))
+                print(f"{sample} is now dry and ready for the next steps.")
+
+                # Beweeg naar het sample
+                coordinates = grid_to_coordinates(rij, kolom)
+                langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")  # goed
+                move_robot(coordinates, f"2. Beweging om {sample} op te pakken")  # goed
+                pick_up(coordinates, f"3. Pakken van {sample} met aanpasingven van de grijper")  # goed
+                orintatie_van_gripper(coordinates, f"4. Orintatie van {sample} gripper aanpassing in grid")  # goed
+                er_uit_halen_van_kast(coordinates, f"5. er uit halen van {sample}")
+
+                # Fotografeer het sample
+                move_robot_Photo1(coordinates, f"6.moven voor fotos")
+                move_robot_Photo2(coordinates, f"6.moven voor fotos")
+                move_robot_Photo3(coordinates, f"6.moven voor fotos")
+                move_robot_Photo4(coordinates, f"6.moven voor fotos")
+
+                led_control.set_led_range(3, 0, 29, "White")
+                take_photo(f"Photo met verf in normaal licht van {sample}")
+                led_control.set_led_range(3, 0, 29, "Black")
+
+                # Fotografeer het sample in uv-----------------------------------------------------------------------
+                io_commands.activate_io_port(4)
+                take_photo(f"Photo in uv licht van {sample}")
+                io_commands.deactivate_io_port(4)
+
+                move_robot_Photo3(coordinates, f"6.moven voor fotos")
+                move_robot_Photo2(coordinates, f"6.moven voor fotos")
+                move_robot_Photo1(coordinates, f"6.moven voor fotos")
+
+                # terug leggen
+                move_robot_terug(coordinates, f"8. Beweging om {sample} terug te leggen")
+                het_in_de_kast_leggen(coordinates, f"9. Beweging om {sample} terug te leggen")
+                orintatie_van_gripper_er_uit(coordinates,
+                                             f"10. Orintatie van {sample} gripper aanpassing in grid om er uit te gaan")
                 terug_de_grijper_er_uit(coordinates, f"11. Beweging om grijper van {sample} weg te halen")
 
-                #
-                # grid controleren op sampel
-                #
+                # Markeer sample als klaar
+                grid[rij][kolom] = f"{sample} klaar"
 
+                mux_tracker.run_for_next_minute()
+                gui.update_sensor_status(sensor_id, "green")
 
-                # Add to drying queue
-                drying_queue.append((time.time(), rij, kolom, sample))
-                print(f"{sample} added to drying queue.")
-        # Wait until all samples are dry
-        while drying_queue:
-            drying_queue.sort(key=lambda x: x[0])  # Sort by drying time
+                grid[rij][kolom] = sample
 
-            current_time = time.time()
-            for start_time, r, c, s in drying_queue[:]:
-                elapsed = int(current_time - start_time)
-                if elapsed < 120:  # Check drying time
-                    print(f"{s} is drying. Time elapsed: {elapsed // 60}m {elapsed % 60}s.")
-                else:
-                    # Sample is dry, process it
-                    drying_queue.remove((start_time, r, c, s))
-                    print(f"{s} is now dry and ready for photo.")
-
-                    # Move to sample
-                    coordinates = grid_to_coordinates(r, c)
-                    langzaam_naar_grid(coordinates, f"1. Slowly move to {s} in grid")
-                    move_robot(coordinates, f"2. Move to pick up {s}")
-                    pick_up(coordinates, f"3. Pick up {s} with gripper", r)
-                    orintatie_van_gripper(coordinates, f"4. Gripper orientation adjustment for {s}")
-                    er_uit_halen_van_kast(coordinates, f"5. Remove {s} from cabinet")
-
-                    # Take photos
-                    move_robot_Photo1(coordinates, f"6. Moving for photos")
-                    move_robot_Photo2(coordinates, f"6. Moving for photos")
-                    move_robot_Photo3(coordinates, f"6. Moving for photos")
-                    move_robot_Photo4(coordinates, f"6. Moving for photos")
-
-                    # Relay for light on
-                    led_control.set_led_range(3, 0, 29, "White")
-                    take_photo(f"Photo with paint under normal light of {s}")
-                    led_control.set_led_range(3, 0, 29, "Black")
-                    # Relay for light off
-                    
-                    #uv foto
-                    io_ports_init(4)
-                    take_photo(f"Photo in UV light of {s}")
-                    deactivate_io_port(4)
-
-                    # Return to storage
-                    move_robot_terug(coordinates, f"8. Return {s} to storage")
-                    het_in_de_kast_leggen(coordinates, f"9. Put {s} in storage")
-                    orintatie_van_gripper_er_uit(coordinates, f"10. Gripper orientation out for {s}")
-                    terug_de_grijper_er_uit(coordinates, f"11. Remove gripper from {s}")
-
-                    # Mark sample as done
-                    grid[r][c] = f"{s} done"
-
-                    #
-                    # grid controleren op sampel
-                    #
-
-        # Check if the grid is fully processed
-        all_done = all(cell is None or "done" in str(cell) for row in grid for cell in row)
-        if all_done:
-            print("All samples processed. Starting a new cycle.")
-        else:
-            print("Not all samples are processed.")
-
+    # Controleer of het grid volledig verwerkt is
+    all_done = all(cell is None or "klaar" in str(cell) for row in grid for cell in row)
+    if all_done:
+        print("Alle samples zijn verwerkt. Start een nieuwe cyclus.")
+    else:
+        print("Nog niet alle samples zijn verwerkt.")
         time.sleep(5)  # Pause briefly before starting again

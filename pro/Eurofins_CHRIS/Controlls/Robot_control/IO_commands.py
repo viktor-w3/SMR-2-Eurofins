@@ -9,10 +9,10 @@ def activate_io_port(port_number):
     Activates the specified IO port.
 
     Args:
-        port_number (int): The IO port number to activate (e.g., 0 to 4).
+        port_number (int): The IO port number to activate (e.g., 0 to 5).
     """
-    if not (0 <= port_number <= 4):
-        raise ValueError("Port number must be between 0 and 4.")
+    if not (0 <= port_number <= 5):
+        raise ValueError("Port number must be between 0 and 5.")
 
     command = f"""
     sec activateIO():
@@ -27,10 +27,10 @@ def deactivate_io_port(port_number):
     Deactivates the specified IO port.
 
     Args:
-        port_number (int): The IO port number to deactivate (e.g., 0 to 4).
+        port_number (int): The IO port number to deactivate (e.g., 0 to 5).
     """
-    if not (0 <= port_number <= 4):
-        raise ValueError("Port number must be between 0 and 4.")
+    if not (0 <= port_number <= 5):
+        raise ValueError("Port number must be between 0 and 5.")
 
     command = f"""
     sec deactivateIO():
@@ -46,9 +46,10 @@ def io_ports_init():
     deactivate_io_port(2)
     deactivate_io_port(3)
     deactivate_io_port(4)
+    deactivate_io_port(5)
     time.sleep(0.1)
 
-def io_activate_all():
+def io_activate_all(): #except 5, for painting reasons
     activate_io_port(0)
     activate_io_port(1)
     activate_io_port(2)
