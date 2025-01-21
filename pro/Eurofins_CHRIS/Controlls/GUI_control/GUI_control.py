@@ -1,8 +1,12 @@
+# Controlls/GUI_control/GUI_control.py
+
+import os
 import tkinter as tk
 from tkinter import messagebox
 from threading import Thread
 from Process import process_samples  # Import the process function from Robot_process
 from Config import SENSOR_TO_GRID_POSITION
+
 
 class EurofinsGUI:
     def __init__(self, root, arduino_connection):
@@ -24,9 +28,15 @@ class EurofinsGUI:
 
         for rij in range(3):  # Assuming a 3x3 grid
             for kolom in range(3):
-                cell = tk.Label(self.grid_frame, text=f"({rij},{kolom})", width=10, height=4, relief="solid", bg="white")
+                cell = tk.Label(self.grid_frame, text=f"({rij},{kolom})", width=10, height=4, relief="solid",
+                                bg="white")
                 cell.grid(row=rij, column=kolom, padx=5, pady=5)
                 self.grid_cells[(rij, kolom)] = cell
+
+        # Button to open photo directory
+        self.open_directory_button = tk.Button(self.root, text="Open Photo Directory",
+                                               command=self.open_photo_directory)
+        self.open_directory_button.grid(row=2, column=0, columnspan=2, pady=10)
 
         self.process_thread = None
         self.running = False
@@ -95,3 +105,27 @@ class EurofinsGUI:
         if grid_position:
             rij, kolom = grid_position  # Using 'rij' and 'kolom'
             self.update_grid({(rij, kolom): status})
+
+    def open_photo_directory(self):
+        """
+        Opens the directory where the photos are saved.
+        The function assumes that the sample number or name is dynamically managed elsewhere.
+        """
+        # Here we assume that the sample number/name is already known
+        sample_name = "sample1"  # This can be dynamically updated with the correct sample name
+
+        # Define the base path to your directory
+        base_path = "C:\\Users\\Denri\\Desktop\\Smr 2"
+
+        # Construct the full path for the sample directory
+        photo_directory = os.path.join(base_path, sample_name)
+
+        # Check if the directory exists
+        if os.path.exists(photo_directory):
+            try:
+                # Open the directory using the default file explorer
+                os.startfile(photo_directory)  # Works on Windows
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to open the directory: {e}")
+        else:
+            messagebox.showerror("Directory Not Found", f"The directory for {sample_name} does not exist.")

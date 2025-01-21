@@ -35,7 +35,7 @@ def move_robot_terug(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(0.5)
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ def orintatie_van_gripper(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(0.5)
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 #omhoog met de sample voor het er uit halen
 def orintatie_van_gripper_er_uit(coordinates, message=""):
@@ -71,7 +71,7 @@ def orintatie_van_gripper_er_uit(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # gaat rustig naar de positie toe
 def langzaam_naar_grid(coordinates, message=""):
@@ -86,7 +86,7 @@ def langzaam_naar_grid(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(0.5)
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ def pick_up(coordinates, rij, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(5)
+    time.sleep(0.5)
 
 
 
@@ -137,7 +137,7 @@ def er_uit_halen_van_kast(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(5)
+    time.sleep(0.5)
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ def langzaam_uit_grid(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(0.5)
 
     verf_punt = [0.300, 0.550, 0.500]
     orientation = [2.19, -2.2, -0.04]
@@ -166,7 +166,7 @@ def langzaam_uit_grid(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2)
+    time.sleep(0.5)
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ def het_in_de_kast_leggen(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # grijper er uit halen
 def terug_de_grijper_er_uit(coordinates, message=""):
@@ -207,7 +207,7 @@ def terug_de_grijper_er_uit(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -224,7 +224,7 @@ def move_robot_Photo1(photo_punt1, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 def move_robot_Photo2(photo_punt2, message=""):
@@ -239,7 +239,7 @@ def move_robot_Photo2(photo_punt2, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 def move_robot_Photo3(photo_punt3, message=""):
@@ -254,7 +254,7 @@ def move_robot_Photo3(photo_punt3, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 def move_robot_Photo4(photo_punt4, message=""):
@@ -269,7 +269,7 @@ def move_robot_Photo4(photo_punt4, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ def move_photo_en_verf_punt( message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 def move_robot_verf1(verf_punt1, message=""):
     verf_punt1 = [-0.159, 0.193, 0.112]
@@ -302,7 +302,7 @@ def move_robot_verf1(verf_punt1, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 def move_robot_verf2(verf_punt2, message=""):
@@ -318,7 +318,7 @@ def move_robot_verf2(verf_punt2, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 def move_robot_verf3(verf_punt3, message=""):
     verf_punt3 = [-0.314, - 0.285, 0.041]
@@ -333,7 +333,7 @@ def move_robot_verf3(verf_punt3, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 def move_robot_verf4(verf_punt4, message=""):
@@ -349,7 +349,7 @@ def move_robot_verf4(verf_punt4, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 def move_robot_verf5(verf_punt5, message=""):
@@ -365,7 +365,7 @@ def move_robot_verf5(verf_punt5, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 def move_robot_verf6(verf_punt6, message=""):
@@ -381,7 +381,7 @@ def move_robot_verf6(verf_punt6, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)
 
 
 def vervenklaar(vervenklaar, message=""):
@@ -396,4 +396,4 @@ def vervenklaar(vervenklaar, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(20)
+    time.sleep(0.5)

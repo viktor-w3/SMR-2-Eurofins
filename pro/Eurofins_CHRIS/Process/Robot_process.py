@@ -63,6 +63,9 @@ def process_samples(arduino_connection,gui, running):
                 print(f"Processing {sample} at grid[{rij}][{kolom}]...")
 
                 gui.update_sensor_status(sensor_id, "orange")
+                strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
+                led_control.set_led_range(strip_index, start_index, end_index, "Orange")  # Set LEDs to orange for the range
+
                 coordinates = grid_to_coordinates(rij, kolom)
 
                 langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")
@@ -78,8 +81,10 @@ def process_samples(arduino_connection,gui, running):
                 move_robot_Photo4(coordinates, f"6.moven voor fotos")
 
                 led_control.set_led_range(3, 0, 29, "White") # LEDstrip 3 aan
-                take_photo(sample_base_name="sample",
-                           output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2"f"Photo zonder verf van {sample}")
+                # First set of photos (before painting)
+                take_photo(sample_base_name=f"sample_{sample}_Clean",
+                           output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2")
+
                 led_control.set_led_range(3, 0, 29, "Black") # LEDstrip 3 uit # LED 3 uit
 
                 move_robot_Photo3(coordinates, f"6.moven voor fotos")
@@ -93,10 +98,12 @@ def process_samples(arduino_connection,gui, running):
                 move_robot_verf3(f"7.moven voor fotos")
                 move_robot_verf4(f"7.moven voor fotos")
                 move_robot_verf5(f"7.moven voor fotos")
-
-                #io_commands.activate_io_port(5)          #arduino_commands.servo_on()# servomoter aan
+                
+                #io_commands.activate_io_port(5)
+                arduino_commands.servo_on()# servomoter aan
                 move_robot_verf6(f"7.moven voor fotos")
-                #io_commands.deactivate_io_port(5)        #arduino_commands.servo_off()# servomotor uit
+                #io_commands.deactivate_io_port(5)
+                arduino_commands.servo_off()# servomotor uit
 
                 vervenklaar(f"7.vervenklaar")
                 move_robot_verf1(f"7.moven voor fotos")
@@ -156,12 +163,18 @@ def process_samples(arduino_connection,gui, running):
                 move_robot_Photo4(coordinates, f"6.moven voor fotos")
 
                 led_control.set_led_range(3, 0, 29, "White")
-                take_photo(f"Photo met verf in normaal licht van {sample}")
+                # Second set of photos (after painting)
+                take_photo(sample_base_name=f"sample_{sample}_White",
+                           output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2")
+
                 led_control.set_led_range(3, 0, 29, "Black")
 
                 # Fotografeer het sample in uv-----------------------------------------------------------------------
                 io_commands.activate_io_port(4)
-                take_photo(f"Photo in uv licht van {sample}")
+                # Second set of photos (after painting)
+                take_photo(sample_base_name=f"sample_{sample}_UV",
+                           output_dir_base="C:\\Users\\Denri\\Desktop\\Smr 2")
+
                 io_commands.deactivate_io_port(4)
 
                 move_robot_Photo3(coordinates, f"6.moven voor fotos")
@@ -179,7 +192,10 @@ def process_samples(arduino_connection,gui, running):
                 grid[rij][kolom] = f"{sample} klaar"
 
                 mux_tracker.run_for_next_minute(gui)
-                gui.update_sensor_status(sensor_id, "green")
+                gui.update_sensor_status(sensor_id, "Blue")
+                strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
+                led_control.set_led_range(strip_index, start_index, end_index, "Blue")  # Set LEDs to orange for the range
+
 
                 grid[rij][kolom] = sample
 
