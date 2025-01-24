@@ -69,6 +69,16 @@ class EurofinsGUI:
                 self.terminate_process()
             else:
                 self.running = True
+    def emergency_stop():
+        """
+        Voert een noodstop uit door het 'halt()'-commando naar de robot te sturen.
+        """
+        command = "halt()\n"
+        print("Noodstop geactiveerd: Robot wordt onmiddellijk gestopt.")
+    # Verzenden van het URScript-commando
+        response = send_urscript_command(command)
+        print(f"Robot antwoord: {response}")
+        return response
 
     def terminate_process(self):
         """Terminate the process and reset the grid"""
