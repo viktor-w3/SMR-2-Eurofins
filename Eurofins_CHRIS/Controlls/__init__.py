@@ -13,11 +13,15 @@ from .Arduino_control import (
 # Importing Camera-related classes and functions
 from .Camera_control import (
     CameraHandler,         # Ensure defined in Camera_control
-    take_photo             # Ensure defined in Camera_control
+    take_clean_photo,
+    take_white_photo,
+    take_uv_photo
+
 )
 
 # Importing GUI-related classes
 from .GUI_control import EurofinsGUI  # Ensure defined in GUI_control
+from .GUI_control import get_color
 
 # Importing Robot-related functions and variables
 from .Robot_control import (
@@ -26,27 +30,25 @@ from .Robot_control import (
     deactivate_io_port,          # Ensure defined in Robot_control
     io_ports_init,               # Ensure defined in Robot_control
     io_activate_all,             # Ensure defined in Robot_control
-    move_robot,                  # Ensure defined in Robot_control
-    move_robot_terug,            # Ensure defined in Robot_control
-    orintatie_van_gripper,       # Ensure defined in Robot_control
-    orintatie_van_gripper_er_uit,# Ensure defined in Robot_control
-    langzaam_naar_grid,          # Ensure defined in Robot_control
-    pick_up,                     # Ensure defined in Robot_control
-    er_uit_halen_van_kast,       # Ensure defined in Robot_control
-    langzaam_uit_grid,           # Ensure defined in Robot_control
-    het_in_de_kast_leggen,       # Ensure defined in Robot_control
-    terug_de_grijper_er_uit,     # Ensure defined in Robot_control
-    move_robot_Photo1,           # Ensure defined in Robot_control
-    move_robot_Photo2,           # Ensure defined in Robot_control
-    move_robot_Photo3,           # Ensure defined in Robot_control
-    move_robot_Photo4,           # Ensure defined in Robot_control
-    grid,                        # Ensure defined in Robot_control
-    grid_to_coordinates,         # Ensure defined in Robot_control
-    move_robot_verf1,            # Ensure defined in Robot_control
-    move_robot_verf2,            # Ensure defined in Robot_control
-    move_robot_verf3,            # Ensure defined in Robot_control
-    move_robot_verf4,            # Ensure defined in Robot_control
-    move_robot_verf5,            # Ensure defined in Robot_control
-    move_robot_verf6,            # Ensure defined in Robot_control
-    vervenklaar                  # Ensure defined in Robot_control
+    set_robot_payload,
+    move_robot,
+    move_robot_terug,
+    orintatie_van_gripper,
+    orintatie_van_gripper_er_uit,
+    langzaam_naar_grid,
+    pick_up,
+    er_uit_halen_van_kast,
+    het_in_de_kast_leggen,
+    terug_de_grijper_er_uit,
+    move_robot_Photo1,
+    move_robot_Photo2,
+    move_robot_Photo3,
+    move_robot_Photo4,
+    move_robot_verf1,
+    move_robot_verf2,
+    move_robot_verf3,
+    move_robot_verf4,
+    move_robot_verf5,
+    move_robot_verf6,
+    vervenklaar
 )

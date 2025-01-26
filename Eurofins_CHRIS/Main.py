@@ -1,81 +1,101 @@
-# main.py
-
-# Import necessary classes and functions from other files
+import os
+import tkinter as tk
 from Controlls.Arduino_control.Connection import ArduinoConnection
 from Controlls.Arduino_control.Mux_control import MuxControl
 from Process.Robot_process import process_sensors
 from Process.States_samples import create_sensors
-from Controlls.GUI_control import EurofinsGUI  # Assuming this is the correct path
-from Controlls.Arduino_control.Led_control import LEDControl  # Assuming this is the correct path
-import tkinter as tk
-
-from Controlls.Robot_control import *
-from Controlls.Camera_control import *
-from Controlls.Arduino_control.Monitor_mux import MuxStatusTracker
-from Controlls.Arduino_control.Mux_control import MuxControl
-from Controlls.Robot_control.Robot_grid import grid, grid_to_coordinates
-from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP
-from Controlls.Arduino_control.Command import ArduinoCommands
-from Controlls.Robot_control import IO_commands
+from Controlls.GUI_control import EurofinsGUI
 from Controlls.Arduino_control.Led_control import LEDControl
-from Config import SENSOR_TO_GRID_POSITION
-from Controlls.Arduino_control import ArduinoConnection  # Assuming you have a class for Arduino connection
-#from Process.Robot_process import process_samples
-from Controlls.GUI_control import EurofinsGUI  # Assuming your GUI class is in EurofinsGUI.py
+from Controlls.Robot_control import IO_commands
+from Controlls.Arduino_control.Command import ArduinoCommands
+from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP
+from Controlls.Arduino_control.Monitor_mux import MuxStatusTracker
+import threading
 
 
 def setup_arduino():
     """Set up the Arduino connection and return the connection object."""
     try:
-        # Establish connection to Arduino once
         print("Setting up Arduino connection...")
-        connection = ArduinoConnection('COM4')  # Adjust port if needed
+        connection = ArduinoConnection('COM4')  # Replace with your actual port
         print("Arduino connected successfully!")
         return connection
     except Exception as e:
         print(f"Error while setting up Arduino connection: {e}")
         return None
 
+
+
+
 def main():
-    print("Process started.")
+    print("Initializing process...")
+
+    # Initialize Arduino connection
     arduino_connection = setup_arduino()
+
+    if not arduino_connection:
+        print("Failed to establish Arduino connection. Exiting...")
+        return
 
     # Create ArduinoCommands instance
     arduino_commands = ArduinoCommands(arduino_connection)
     io_commands = IO_commands
 
-    # Create MuxControl and LEDControl
+    # Initialize MuxControl, LEDControl
     mux_control = MuxControl(arduino_connection)
     led_control = LEDControl(arduino_commands)
 
-    # Create MuxStatusTracker with proper dependencies
+    # Initialize MuxStatusTracker
     mux_status_tracker = MuxStatusTracker(mux_control, led_control, SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP)
 
-    # Create sensors and initialize the GUI
+    # Create sensors
     sensors = create_sensors()
 
-    # Initialize the GUI in the Tkinter mainloop
-    root = tk.Tk()  # Create the main Tkinter root window
+    # Initialize IO ports
+    io_commands.io_ports_init()
+    print("Initializing all IO ports...")
+    io_commands.io_activate_all()
+    print("Turning all IO ports ON...")
+    io_commands.deactivate_io_port(4)  # Example of turning off a port
+    print("Turning IO port 4 OFF...")
+
+    # Initialize LEDs and servo
+    arduino_commands.initialize_leds()
+    arduino_commands.initialize_servo()
+
+    # Initialize the GUI
+    root = tk.Tk()
     gui = EurofinsGUI(root, arduino_connection)  # Pass the Arduino connection to the GUI
 
-    # Start the sensor processing in a background thread
-    def run_sensor_processing():
-        process_sensors(sensors, mux_control, gui, led_control, mux_status_tracker)
+    # Create a function to start sensor processing in a separate thread when the start button is clicked
+    def start_sensor_processing():
+        """Start the sensor processing in a separate thread."""
+        try:
+            # Pass all required arguments to process_sensors
+            process_sensors(
+                sensors,  # sensors
+                mux_control,  # mux_control
+                gui,  # gui (EurofinsGUI instance)
+                led_control,  # led_control
+                mux_status_tracker,  # mux_status_tracker
+                arduino_commands,  # arduino_commands
+                io_commands  # io_commands
+            )
+        except Exception as e:
+            print(f"Error during sensor processing: {e}")
+        finally:
+            gui.running = False  # Stop the process flag when finished
+            print("Sensor process completed.")
 
-    # Run the sensor processing in a background thread
-    import threading
-    sensor_thread = threading.Thread(target=run_sensor_processing, daemon=True)
-    sensor_thread.start()
+    # Modify the start button in the GUI to call `start_sensor_processing` on click
+    gui.start_button.config(command=start_sensor_processing)
 
-    # Start the Tkinter event loop
+    # Start Tkinter event loop
     root.mainloop()
 
     # Cleanup after the GUI is closed
+    print("Shutting down...")
     arduino_connection.disconnect()
-
-
-
-
 
 
 if __name__ == "__main__":

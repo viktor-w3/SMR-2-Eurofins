@@ -17,17 +17,10 @@ class MuxStatusTracker:
     def sensor_to_grid_position(self, sensor_id):
         return SENSOR_TO_GRID_POSITION.get(sensor_id)
 
-    def run_for_next_minute(self, gui):
-        start_time = time.time()  # Record the start time
-        end_time = start_time + 10  # End time after 60 seconds
-
-        while time.time() < end_time:  # Continue until 60 seconds have passed
-            self.monitor_mux_and_control_leds(gui)  # Call your method here
-            time.sleep(0.5)
-
-    def monitor_mux_and_control_leds(self, gui):
+    def monitor_mux_and_control_leds(self, gui, sensors):
         """
         Monitor multiplexer channels and control LEDs based on sensor status.
+        Also updates the sensor state and the grid.
         """
         previous_grid_state = [row[:] for row in grid]
 
@@ -44,14 +37,14 @@ class MuxStatusTracker:
             high_count = sum(status_votes)
             is_active = high_count >= 1  # Sensor is considered active if HIGH appears at least 2 times
 
-            # Get LED strip indices
-            strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
-
             # Update LED color based on sensor status
+            strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
             if is_active:
                 self.led_control.set_led_range(strip_index, start_index, end_index, "Green")
+                sensors[sensor_id].update_state('New_sample')
             else:
                 self.led_control.set_led_range(strip_index, start_index, end_index, "Red")
+                sensors[sensor_id].update_state('No_sample')
 
             # Update grid based on sensor status
             grid_position = self.sensor_to_grid_position(sensor_id)
@@ -63,7 +56,7 @@ class MuxStatusTracker:
 
                 # Update the GUI grid color
                 color = "Red" if is_active else "Green"
-                #gui.update_sensor_status(sensor_id, color)
+                # gui.update_sensor_status(sensor_id, color)
 
         # Compare the current grid with the previous state and log updates
         for rij, (prev_row, curr_row) in enumerate(zip(previous_grid_state, grid)):
@@ -73,3 +66,4 @@ class MuxStatusTracker:
                         print(f"Grid updated: Added {curr_cell} at position ({rij}, {kolom}).")
                     else:
                         print(f"Grid updated: Cleared position ({rij}, {kolom}).")
+

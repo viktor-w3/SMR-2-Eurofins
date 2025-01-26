@@ -1,3 +1,5 @@
+# Controlls/GUI_control/GUI_control.py
+
 import os
 import tkinter as tk
 from tkinter import messagebox
@@ -5,10 +7,16 @@ from threading import Thread
 from Process import process_sensors  # Import the correct function from Robot_process
 from Config import SENSOR_TO_GRID_POSITION
 from Controlls.GUI_control.Gui_grid_color import get_color  # Import the color function
+from Controlls.Arduino_control.Mux_control import MuxControl
+from Controlls.Arduino_control.Led_control import LEDControl
+from Controlls.Arduino_control.Monitor_mux import MuxStatusTracker
+from Controlls.Arduino_control.Command import ArduinoCommands
+from Controlls.Robot_control import IO_commands
+from Process.States_samples import Sensor
 
 
 class EurofinsGUI:
-    def __init__(self, root, arduino_connection):
+    def __init__(self, root, arduino_connection, sensors):
         self.root = root
         self.root.title("Eurofins Process Control")
         self.arduino_connection = arduino_connection
@@ -16,6 +24,7 @@ class EurofinsGUI:
         self.grid_data = {}  # Track the state and timer for each grid cell
         self.process_thread = None
         self.running = False
+        sensors = self.sensors
 
         # Start and Stop buttons
         self.start_button = tk.Button(self.root, text="Start Process", command=self.start_process)
@@ -61,8 +70,16 @@ class EurofinsGUI:
     def run_process(self):
         """Run the robot processing function."""
         try:
-            # Pass required arguments to process_sensors
-            process_sensors(self.arduino_connection, self)
+            # Assuming you have the necessary components like sensors, mux_control, gui, etc.
+            sensors = self.sensors
+            mux_control = MuxControl()
+            led_control = LEDControl()
+            mux_status_tracker = MuxStatusTracker()
+            arduino_commands = ArduinoCommands()
+            io_commands = IO_commands()
+
+            # Now you call process_sensors without needing to pass redundant parameters
+            process_sensors(sensors, mux_control, self, led_control, mux_status_tracker, arduino_commands, io_commands)
         except Exception as e:
             print(f"Error during process: {e}")
         finally:
