@@ -24,7 +24,7 @@ class EurofinsGUI:
         self.grid_data = {}  # Track the state and timer for each grid cell
         self.process_thread = None
         self.running = False
-        sensors = self.sensors
+        self.sensors = sensors
 
         # Start and Stop buttons
         self.start_button = tk.Button(self.root, text="Start Process", command=self.start_process)
@@ -72,14 +72,9 @@ class EurofinsGUI:
         try:
             # Assuming you have the necessary components like sensors, mux_control, gui, etc.
             sensors = self.sensors
-            mux_control = MuxControl()
-            led_control = LEDControl()
-            mux_status_tracker = MuxStatusTracker()
-            arduino_commands = ArduinoCommands()
-            io_commands = IO_commands()
 
             # Now you call process_sensors without needing to pass redundant parameters
-            process_sensors(sensors, mux_control, self, led_control, mux_status_tracker, arduino_commands, io_commands)
+            process_sensors(sensors, self)
         except Exception as e:
             print(f"Error during process: {e}")
         finally:

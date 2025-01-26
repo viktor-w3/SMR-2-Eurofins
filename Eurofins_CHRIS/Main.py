@@ -65,7 +65,7 @@ def main():
 
     # Initialize the GUI
     root = tk.Tk()
-    gui = EurofinsGUI(root, arduino_connection)  # Pass the Arduino connection to the GUI
+    gui = EurofinsGUI(root, arduino_connection, sensors)  # Pass the Arduino connection to the GUI
 
     # Create a function to start sensor processing in a separate thread when the start button is clicked
     def start_sensor_processing():
