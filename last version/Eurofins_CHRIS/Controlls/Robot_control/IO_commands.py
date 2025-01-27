@@ -38,7 +38,7 @@ def deactivate_io_port(port_number):
     end
     """
     response = send_urscript_command(command)
-    print(f"Robot antwoord: {response}")
+    #print(f"Robot antwoord: {response}")
 
 def io_ports_init():
     deactivate_io_port(0)

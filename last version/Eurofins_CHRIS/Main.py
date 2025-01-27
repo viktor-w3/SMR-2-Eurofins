@@ -1,16 +1,20 @@
-# Main.py
-import tkinter as tk
-from Controlls.Arduino_control import ArduinoConnection  # Assuming you have a class for Arduino connection
-from Process.Robot_process import process_samples
-from Controlls.GUI_control import EurofinsGUI  # Assuming your GUI class is in EurofinsGUI.py
-
+import time
+from Controlls.Arduino_control.Connection import ArduinoConnection
+from Controlls.Arduino_control.Mux_control import MuxControl
+from Process.Robot_process import process_sensors
+from Process.States_samples import Sensor, SensorState
+from Controlls.Arduino_control.Led_control import LEDControl
+from Controlls.Robot_control import IO_commands
+from Controlls.Arduino_control.Command import ArduinoCommands
+from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP
+from Controlls.Arduino_control.Monitor_mux import MuxStatusTracker
+from Process.States_samples import Sensor, SensorState
 
 def setup_arduino():
     """Set up the Arduino connection and return the connection object."""
     try:
-        # Establish connection to Arduino once
         print("Setting up Arduino connection...")
-        connection = ArduinoConnection('COM4')  # Adjust port if needed
+        connection = ArduinoConnection('COM4')  # Replace with your actual port
         print("Arduino connected successfully!")
         return connection
     except Exception as e:
@@ -18,28 +22,70 @@ def setup_arduino():
         return None
 
 
+from Process.States_samples import Sensor  # Import the Sensor class
+from Config import SENSOR_TO_GRID_POSITION
+
+
+def create_sensors():
+    """
+    Function to create all sensors dynamically based on the grid mapping
+    and print their details.
+    """
+    sensors = []  # List to hold all sensor objects
+
+    # Loop through each sensor ID in SENSOR_TO_GRID_POSITION
+    for sensor_id in SENSOR_TO_GRID_POSITION:
+        sensor = Sensor(sensor_id)  # Automatically assigns the position from the grid mapping
+        sensors.append(sensor)  # Add the sensor to the list
+        print(sensor)  # Print the sensor's information
+
+    return sensors
+
 def main():
+    print("Initializing process...")
 
-
-    # Set up Arduino connection (using setup_arduino function)
+    # Initialize Arduino connection
     arduino_connection = setup_arduino()
 
-    if arduino_connection:
-        # Create the root window for the Tkinter GUI
-        root = tk.Tk()
-
-        # Initialize the Eurofins GUI
-        gui = EurofinsGUI(root, arduino_connection)
-
-        root.mainloop()
-        # Start the process with both Arduino connection and GUI instance
-    else:
+    if not arduino_connection:
         print("Failed to establish Arduino connection. Exiting...")
-        return  # Exit the program if the connection fails
+        return
 
-    # Start the Tkinter main loop
+    # Create ArduinoCommands instance
+    arduino_commands = ArduinoCommands(arduino_connection)
+    io_commands = IO_commands
 
+    # Initialize MuxControl, LEDControl
+    mux_control = MuxControl(arduino_connection)
+    led_control = LEDControl(arduino_commands)
+    mux_status_tracker = MuxStatusTracker(mux_control, led_control, SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP)
 
+    # Initialize IO ports
+    io_commands.io_ports_init()
+    print("Initializing all IO ports...")
+    io_commands.io_activate_all()
+    print("Turning all IO ports ON...")
+    io_commands.deactivate_io_port(4)  # Example of turning off a port
+    print("Turning IO port 4 OFF...")
+    # Initialize LEDs and servo
+    arduino_commands.initialize_leds()
+    arduino_commands.initialize_servo()
+    # Create sensors
+    sensors = create_sensors()
+    # Start the sensor processing loop
+    process_sensors(
+        sensors=sensors,
+        mux_control=mux_control,
+        gui=None,  # No GUI required
+        led_control=led_control,
+        mux_status_tracker=mux_status_tracker,
+        arduino_commands=arduino_commands,
+        io_commands=io_commands
+    )
+
+    # Cleanup after processing
+    print("Shutting down...")
+    arduino_connection.disconnect()
 
 if __name__ == "__main__":
     main()
