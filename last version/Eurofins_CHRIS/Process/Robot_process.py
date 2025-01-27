@@ -65,9 +65,9 @@ def process_samples(arduino_connection,gui, running):
                 gui.update_sensor_status(sensor_id, "orange")
                 strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
                 led_control.set_led_range(strip_index, start_index, end_index, "Orange")  # Set LEDs to orange for the range
-
+                
                 coordinates = grid_to_coordinates(rij, kolom)
-
+                set_robot_payload(message="Standaard payload instellen voor UR10")
                 langzaam_naar_grid(coordinates, f"1. Langzaam naar {sample} in grid")
                 move_robot(coordinates, f"2. Beweging om {sample} op te pakken")
                 grid[rij][kolom] = None
@@ -90,8 +90,6 @@ def process_samples(arduino_connection,gui, running):
                 move_robot_Photo3(coordinates, f"6.moven voor fotos")
                 move_robot_Photo2(coordinates, f"6.moven voor fotos")
                 move_robot_Photo1(coordinates, f"6.moven voor fotos")
-                # fotot voor verven klaar------------------------------------------------------------------------------------------------------
-                move_photo_en_verf_punt()
                 # bewegingen voor het verven---------------------------------------------------------------------------------------------------
                 move_robot_verf1(f"7.moven voor fotos")
                 move_robot_verf2(f"7.moven voor fotos")
