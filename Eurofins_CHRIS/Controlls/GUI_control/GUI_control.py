@@ -10,21 +10,29 @@ from Controlls.GUI_control.Gui_grid_color import get_color  # Import the color f
 from Controlls.Arduino_control.Mux_control import MuxControl
 from Controlls.Arduino_control.Led_control import LEDControl
 from Controlls.Arduino_control.Monitor_mux import MuxStatusTracker
+from Controlls.Arduino_control.Monitor_mux import *
 from Controlls.Arduino_control.Command import ArduinoCommands
 from Controlls.Robot_control import IO_commands
 from Process.States_samples import Sensor
+from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP, SENSOR_TO_GRID_POSITION
+from Controlls.Robot_control.Robot_grid import grid  # Import grid from Robot_grid.py
 
 
 class EurofinsGUI:
-    def __init__(self, root, arduino_connection, sensors):
+    def __init__(self, root, arduino_connection,arduino_commands, sensors, io_commands, mux_control, led_control, mux_status_tracker):
         self.root = root
         self.root.title("Eurofins Process Control")
         self.arduino_connection = arduino_connection
+        self.sensors = sensors
+        self.io_commands = io_commands
+        self.mux_control = mux_control
+        self.led_control = led_control
+        self.arduino_commands = arduino_commands
+        self.mux_status_tracker = mux_status_tracker
+        self.running = False
+        self.process_thread = None
         self.sample_timers = {}  # Track drying timers for samples
         self.grid_data = {}  # Track the state and timer for each grid cell
-        self.process_thread = None
-        self.running = False
-        self.sensors = sensors
 
         # Start and Stop buttons
         self.start_button = tk.Button(self.root, text="Start Process", command=self.start_process)
@@ -74,7 +82,13 @@ class EurofinsGUI:
             sensors = self.sensors
 
             # Now you call process_sensors without needing to pass redundant parameters
-            process_sensors(sensors, self)
+            process_sensors(sensors=sensors,
+                            mux_control=self.mux_control,
+                            gui=self,
+                            led_control=self.led_control,
+                            mux_status_tracker=self.mux_status_tracker,
+                            arduino_commands=self.arduino_commands,
+                            io_commands=self.io_commands)
         except Exception as e:
             print(f"Error during process: {e}")
         finally:

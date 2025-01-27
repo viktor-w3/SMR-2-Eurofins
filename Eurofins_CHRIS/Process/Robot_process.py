@@ -1,4 +1,4 @@
-# Process/Robot_process.py
+# Process/Robot_PO.py
 
 
 from Process.Timer import Timer
@@ -54,12 +54,12 @@ def process_sensors(sensors, mux_control, gui, led_control, mux_status_tracker, 
 
     while not all_done:
         # Monitoring MUX channels and controlling LEDs
-        mux_status_tracker.monitor_mux_and_control_leds(gui)
+        mux_status_tracker.monitor_mux_and_control_leds(sensors,gui)
 
         for sensor_id, sensor in sensors.items():
             print(f"Processing Sensor {sensor_id} at position {sensor.position}")
             print(f"Sensor status: {sensor.current_state}")
-            gui.update_sensor_status(sensor_id, "orange")
+           # gui.update_sensor_status(sensor_id, "orange")
             strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
             led_control.set_led_range(strip_index, start_index, end_index, "Orange")  # Set LEDs to orange for the range
 

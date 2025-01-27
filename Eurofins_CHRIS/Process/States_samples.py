@@ -17,5 +17,6 @@ def create_sensors():
     sensors = {}
     for sensor_id, position in SENSOR_TO_GRID_POSITION.items():
         sensors[sensor_id] = Sensor(sensor_id, position)
+        print("Initialized sensors:", sensors)
     return sensors
 
