@@ -5,8 +5,7 @@ import time
 
 class MuxControl:
     def __init__(self, connection: ArduinoConnection):
-        self.connection = connection  # Using 'connection' instead of 'arduino_connection'
-
+        self.connection = connection
 
     def read_mux_channel(self, mux_number, channel_number):
         """Reads the status of a specific channel in a multiplexer."""
@@ -20,8 +19,6 @@ class MuxControl:
 
         if response:
             print(f"Arduino: {response}")
-
-            # If the response is 'done', we just return None or handle success as needed.
             if response == "done":
                 return None  # Return None or handle success as needed
 

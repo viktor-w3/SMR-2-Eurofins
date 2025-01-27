@@ -4,15 +4,36 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 from threading import Thread
-from Process import process_samples  # Import the process function from Robot_process
+from Process import process_sensors  # Import the correct function from Robot_process
 from Config import SENSOR_TO_GRID_POSITION
+from Controlls.GUI_control.Gui_grid_color import get_color  # Import the color function
+from Controlls.Arduino_control.Mux_control import MuxControl
+from Controlls.Arduino_control.Led_control import LEDControl
+from Controlls.Arduino_control.Monitor_mux import MuxStatusTracker
+from Controlls.Arduino_control.Monitor_mux import *
+from Controlls.Arduino_control.Command import ArduinoCommands
+from Controlls.Robot_control import IO_commands
+from Process.States_samples import Sensor
+from Config import SENSOR_TO_MUX_CHANNEL, SENSOR_TO_LED_STRIP, SENSOR_TO_GRID_POSITION
+from Controlls.Robot_control.Robot_grid import grid  # Import grid from Robot_grid.py
 
 
 class EurofinsGUI:
-    def __init__(self, root, arduino_connection):
+    def __init__(self, root, arduino_connection,arduino_commands, sensors, io_commands, mux_control, led_control, mux_status_tracker):
         self.root = root
         self.root.title("Eurofins Process Control")
         self.arduino_connection = arduino_connection
+        self.sensors = sensors
+        self.io_commands = io_commands
+        self.mux_control = mux_control
+        self.led_control = led_control
+        self.arduino_commands = arduino_commands
+        self.mux_status_tracker = mux_status_tracker
+        self.running = False
+        self.process_thread = None
+        self.sample_timers = {}  # Track drying timers for samples
+        self.grid_data = {}  # Track the state and timer for each grid cell
+
         # Start and Stop buttons
         self.start_button = tk.Button(self.root, text="Start Process", command=self.start_process)
         self.start_button.grid(row=0, column=0, padx=10, pady=10)
@@ -28,32 +49,46 @@ class EurofinsGUI:
 
         for rij in range(3):  # Assuming a 3x3 grid
             for kolom in range(3):
-                cell = tk.Label(self.grid_frame, text=f"({rij},{kolom})", width=10, height=4, relief="solid",
-                                bg="white")
-                cell.grid(row=rij, column=kolom, padx=5, pady=5)
-                self.grid_cells[(rij, kolom)] = cell
+                cell_frame = tk.Frame(self.grid_frame, width=100, height=100, relief="solid", bg="white")
+                cell_frame.grid(row=rij, column=kolom, padx=5, pady=5)
+
+                # Adding a label for the sample status
+                cell_label = tk.Label(cell_frame, text=f"({rij},{kolom})", width=10, height=4, relief="solid", bg="white")
+                cell_label.grid(row=0, column=0)
+
+                # Adding a label for the timer
+                timer_label = tk.Label(cell_frame, text="Timer: 0s", width=10, height=2, relief="solid", bg="white")
+                timer_label.grid(row=1, column=0)
+
+                self.grid_cells[(rij, kolom)] = {"status": cell_label, "timer": timer_label}
 
         # Button to open photo directory
         self.open_directory_button = tk.Button(self.root, text="Open Photo Directory",
                                                command=self.open_photo_directory)
         self.open_directory_button.grid(row=2, column=0, columnspan=2, pady=10)
 
-        self.process_thread = None
-        self.running = False
-
     def start_process(self):
         """Start the process in a separate thread"""
         if not self.running:
             self.running = True
             self.process_thread = Thread(target=self.run_process)
+            self.process_thread.daemon = True  # Ensure the thread exits when the main program closes
             self.process_thread.start()
 
     def run_process(self):
         """Run the robot processing function."""
-        self.running = True  # Ensure the process flag is set
         try:
-            # Pass the running flag to process_samples
-            process_samples(self.arduino_connection, self, self.running)
+            # Assuming you have the necessary components like sensors, mux_control, gui, etc.
+            sensors = self.sensors
+
+            # Now you call process_sensors without needing to pass redundant parameters
+            process_sensors(sensors=sensors,
+                            mux_control=self.mux_control,
+                            gui=self,
+                            led_control=self.led_control,
+                            mux_status_tracker=self.mux_status_tracker,
+                            arduino_commands=self.arduino_commands,
+                            io_commands=self.io_commands)
         except Exception as e:
             print(f"Error during process: {e}")
         finally:
@@ -63,71 +98,41 @@ class EurofinsGUI:
     def stop_process(self):
         """Stop the process and ask for confirmation"""
         if self.running:
-            self.running = False
             response = messagebox.askquestion("Stop Process", "Do you want to stop the process?")
             if response == 'yes':
                 self.terminate_process()
-            else:
-                self.running = True
-    def emergency_stop():
-        """
-        Voert een noodstop uit door het 'halt()'-commando naar de robot te sturen.
-        """
-        command = "halt()\n"
-        print("Noodstop geactiveerd: Robot wordt onmiddellijk gestopt.")
-    # Verzenden van het URScript-commando
-        response = send_urscript_command(command)
-        print(f"Robot antwoord: {response}")
-        return response
 
     def terminate_process(self):
         """Terminate the process and reset the grid"""
-        if self.process_thread.is_alive():
+        if self.process_thread and self.process_thread.is_alive():
             print("Terminating process...")
             self.running = False  # Stop the process
             self.process_thread.join(timeout=10)  # Wait for up to 10 seconds to terminate
             if self.process_thread.is_alive():
                 print("Process did not terminate in time!")
-                self.process_thread = None  # Optionally handle this situation
+            self.process_thread = None  # Reset thread reference
         self.update_grid()  # Reset the grid to its initial state
+
+    def update(self):
+        """Update grid cells with colors and timer information."""
+        for (rij, kolom), (state, timer) in self.grid_data.items():
+            cell = self.grid_cells.get((rij, kolom))
+            if cell:
+                cell["status"].config(bg=get_color(state), text=state)  # Use get_color for background color
+                cell["timer"].config(text=f"Timer: {timer}s")
 
     def update_grid(self, grid_data=None):
         """Update the grid UI based on sensor data (LED color)"""
-
-        def update():
-            """Update grid cells with colors."""
-            if grid_data:
-                for (rij, kolom), color in grid_data.items():
-                    cell = self.grid_cells.get((rij, kolom))  # Use 'rij' and 'kolom' as keys
-                    if cell:
-                        cell.config(bg=color)
-            else:
-                # Reset the grid to white
-                for cell in self.grid_cells.values():
-                    cell.config(bg="white")
-
-        # Schedule the update to be done in the main thread
-        self.root.after(0, update)  # 0 ms delay for immediate scheduling
-
-    def update_sensor_status(self, sensor_id, status):
-        """Update a single sensor's status"""
-        grid_position = SENSOR_TO_GRID_POSITION.get(sensor_id)
-        if grid_position:
-            rij, kolom = grid_position  # Using 'rij' and 'kolom'
-            self.update_grid({(rij, kolom): status})
+        if grid_data:
+            self.grid_data = grid_data  # Update the grid data if passed
+        self.root.after(0, self.update)  # Schedule the update on the main thread
 
     def open_photo_directory(self):
-        """
-        Opens the base directory where the photos are saved.
-        """
-        # Define the base path to your directory
-        base_path = "C:\\Users\\denri\\Desktop\\Smr 2"
-
-        # Check if the directory exists
+        """Opens the base directory where the photos are saved."""
+        base_path = "C:\\Users\\denri\\Desktop\\Smr 2"  # Define the base path
         if os.path.exists(base_path):
             try:
-                # Open the directory using the default file explorer
-                os.startfile(base_path)  # Works on Windows
+                os.startfile(base_path)  # Open the directory on Windows
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to open the directory: {e}")
         else:
