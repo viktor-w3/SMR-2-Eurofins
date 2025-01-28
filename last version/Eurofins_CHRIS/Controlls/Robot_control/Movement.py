@@ -23,7 +23,7 @@ def set_robot_payload(message=""):
 
 def move_robot(coordinates, message=""):
     x, y, z = coordinates
-    orientation = [2.13, 2.1, 0.318]
+    orientation = [2.13, 2.1, 0.318]           #=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     speed = 0.8
     acceleration = 0.2
     command = (
@@ -33,9 +33,7 @@ def move_robot(coordinates, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(1)
-
-
+    time.sleep(1)   #1
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Functie om de robot te bewegen voor weer in de grid
 def move_robot_terug(coordinates, message=""):
@@ -54,8 +52,6 @@ def move_robot_terug(coordinates, message=""):
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(3.7)
-
-
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # omhoog met de sample voor het er uit halen
 def orintatie_van_gripper(coordinates, message=""):
@@ -74,8 +70,6 @@ def orintatie_van_gripper(coordinates, message=""):
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(2)
-
-
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # omhoog met de sample voor het er uit halen
 def orintatie_van_gripper_er_uit(coordinates, message=""):
@@ -94,8 +88,6 @@ def orintatie_van_gripper_er_uit(coordinates, message=""):
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(1.5)
-
-
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # gaat rustig naar de positie toe
 def langzaam_naar_grid(coordinates, message=""):
@@ -111,8 +103,6 @@ def langzaam_naar_grid(coordinates, message=""):
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(3)
-
-
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # de grijper van de robot veranderen voor een goede beet 666
 def pick_up(coordinates, rij, message=""):
@@ -128,8 +118,8 @@ def pick_up(coordinates, rij, message=""):
 
     x, y, z = coordinates
     x_pickup = x - 0.650
-    y_pickup = y - 0.042
-    z_pickup = z - 0.001 * rij ** 2 + 0.0040 * rij - 0.0025  # bovenste rij is  + 0.0027  in de midde + 0.0011 en onder -0.0025
+    y_pickup = y - 0.044
+    z_pickup = z - 0.001 * rij ** 2 + 0.0050 * rij + 0.003 # bovenste rij is  + 0.0027  in de midde + 0.0011 en onder -0.0025
     orientation = [2.126, 2.1012, 0.1872]
     speed = 0.8
     acceleration = 0.2
@@ -141,8 +131,6 @@ def pick_up(coordinates, rij, message=""):
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(3.5)
-
-
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # omhoog met de sample voor het er uit halen
 def er_uit_halen_van_kast(coordinates, message=""):
@@ -161,8 +149,6 @@ def er_uit_halen_van_kast(coordinates, message=""):
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
     time.sleep(3.5)
-
-
 # terug leggen van de sample
 def het_in_de_kast_leggen(coordinates, message=""):
     x, y, z = coordinates
