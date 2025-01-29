@@ -1,5 +1,5 @@
 # Process/States_samples.py
-from Config import SENSOR_TO_GRID_POSITION
+from Config import SENSOR_TO_GRID_POSITION, SENSOR_TO_LED_STRIP
 from enum import Enum
 from Process.Timer import Timer
 import time
@@ -19,14 +19,14 @@ class TimerSensor:
         """Start the timer."""
         self.start_time = time.time()
 
-    def get_remaining_time(self, duration=120):
+    def get_remaining_time(self, duration=60):
         """Get the remaining time based on the given duration."""
         if self.start_time is None:
             return duration  # Timer hasn't started, return the full duration
         elapsed_time = int(time.time() - self.start_time)
         return max(0, duration - elapsed_time)
 
-    def is_done(self, duration=120):
+    def is_done(self, duration=60):
         """Check if the timer is finished."""
         return self.get_remaining_time(duration) == 0
 
@@ -40,7 +40,7 @@ class TimerSensor:
 class Sensor:
     timer_manager = Timer()
 
-    def __init__(self, sensor_id, current_state = SensorState.NO_SAMPLE):
+    def __init__(self, sensor_id, current_state = SensorState.NO_SAMPLE, led_control=None):
         self.sensor_id = sensor_id
 
         self.current_state = current_state  # Initial state is No_sample
@@ -49,16 +49,20 @@ class Sensor:
             raise ValueError(f"Sensor ID {sensor_id} is not defined in the grid.")
         self.timer = TimerSensor()
 
+
     def update_state(self, new_state):
         """Update the sensor state"""
         self.current_state = new_state
 
         # Automatically start the timer when transitioning to the DRYING_SAMPLE state
         if self.current_state == SensorState.DRYING_SAMPLE:
-            self.timer.start()
-            print(f"Timer started for Sensor {self.sensor_id}.")
+            if self.timer.start_time is None:  # If the timer hasn't started, start it
+                self.timer.start()
+                print(f"Timer started for Sensor {self.sensor_id}.")
+            else:
+                print(f"Timer already running for Sensor {self.sensor_id}.")
 
-    def check_timer(self, duration=120):
+    def check_timer(self, duration=60):
         """
         Check the remaining time or completion status of the timer.
         :param duration: Total duration of the drying process in seconds (default: 120 seconds).
@@ -66,6 +70,9 @@ class Sensor:
         """
         remaining_time = self.timer.get_remaining_time(duration)
         is_done = self.timer.is_done(duration)
+
+        print(f"Sensor {self.sensor_id}: Remaining Time is {remaining_time} seconds.")
+
         return is_done, remaining_time
 
     def reset_timer(self):

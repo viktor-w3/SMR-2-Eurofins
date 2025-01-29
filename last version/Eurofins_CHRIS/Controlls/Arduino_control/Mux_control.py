@@ -11,6 +11,7 @@ class MuxControl:
         """Reads the status of a specific channel in a multiplexer."""
         # Clear the serial buffer to avoid stale data
         self.connection.clear_buffer()
+        time.sleep(0.1)
 
         # Command format to read from the specific channel
         command = f"read_mux_channel {mux_number} {channel_number}"

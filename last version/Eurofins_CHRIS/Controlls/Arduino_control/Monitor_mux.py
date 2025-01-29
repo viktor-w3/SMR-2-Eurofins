@@ -51,22 +51,34 @@ class MuxStatusTracker:
             strip_index, start_index, end_index = SENSOR_TO_LED_STRIP[sensor_id]
             time.sleep(0.1)
             try:
-                if is_active:
-                    self.led_control.set_led_range(strip_index, start_index, end_index, "Green")
-
+                if is_active: #nothing detected (inverted logic due to arduino)
+                    self.led_control.set_led_range(strip_index, start_index, end_index, "Green") #nothing detected, red (green is red in the arduino)
+                    sensors[sensor_id].update_state(SensorState.NO_SAMPLE)
+                    print(f"updated {sensor_id} to NO_SAMPLE")
                     # Update the sensor state only if it's not already "No_sample"
-                    if sensors[sensor_id].current_state != SensorState.NO_SAMPLE:
-                        continue
+                    if sensors[sensor_id].current_state == SensorState.DONE_SAMPLE:
+                        print(f"{sensor_id} was DONE and had been removed.")
+                        self.led_control.set_led_range(strip_index, start_index, end_index, "Green")  # nothing detected, red (green is red in the arduino)
+                        sensors[sensor_id].update_state(SensorState.NO_SAMPLE)
+                    elif sensors[sensor_id].current_state != SensorState.NO_SAMPLE: #if status is anything else then NO_sample, skip.
+                       print(f"{sensor_id} is something else then NO_SAMPLE")
+                         #possible error handling for fallen sample here.
+                       continue
 
                     time.sleep(0.1)
                 else:
-                    self.led_control.set_led_range(strip_index, start_index, end_index, "Red")
-
+                    #if detected
                     # Update the sensor state only if it's currently "No_sample"
                     if sensors[sensor_id].current_state == SensorState.NO_SAMPLE:
-                        sensors[sensor_id].update_state(SensorState.NEW_SAMPLE)
+                        sensors[sensor_id].update_state(SensorState.NEW_SAMPLE) #update to New_sample
+                        self.led_control.set_led_range(strip_index, start_index, end_index, "White")
+                        print(f"Updated {sensor_id} to NEW_SAMPLE")
+                    else: #if anything else than NO_sample
+                        print(f"Cannot update {sensor_id}, already has a different tag than NO_SAMPLE")
+                        continue
 
                     time.sleep(0.1)
+
             except Exception as e:
                 print(f"Error updating LEDs for sensor {sensor_id}: {e}")
 
@@ -79,7 +91,7 @@ class MuxStatusTracker:
                     grid[rij][kolom] = f"sample{sensor_id}"  # Set the sample name if inactive
 
                 # Update the GUI grid color
-                color = "Green" if is_active else "Red"
+                color = "White" if is_active else "Red"
               #  gui.update_sensor_status(sensor_id, color)
 
         # Compare the current grid with the previous state and log updates

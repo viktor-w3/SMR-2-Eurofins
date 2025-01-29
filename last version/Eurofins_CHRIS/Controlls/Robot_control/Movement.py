@@ -107,19 +107,22 @@ def langzaam_naar_grid(coordinates, message=""):
 # de grijper van de robot veranderen voor een goede beet 666
 def pick_up(coordinates, rij, message=""):
     # Ensure rij is valid
+    """
     if not isinstance(rij, (int, float)):
         try:
             rij = float(rij)
+            print(f"rij value '{rij}' provided to pick_up().")
         except (ValueError, TypeError):
             print(f"Error: Invalid rij value '{rij}' provided to pick_up().")
             return
-
-    print(f"rij (validated) = {rij}")
+    """
+    Rij_int = int(rij)
+    print(f"rij (validated) = {Rij_int}")
 
     x, y, z = coordinates
     x_pickup = x - 0.648
     y_pickup = y - 0.044
-    z_pickup = z - 0.001 * rij ** 2 + 0.0050 * rij + 0.003 # bovenste rij is  + 0.0027  in de midde + 0.0011 en onder -0.0025
+    z_pickup = z - 0.001 * Rij_int ** 2 + 0.0050 * Rij_int + 0.003 # bovenste rij is  + 0.0027  in de midde + 0.0011 en onder -0.0025
     orientation = [2.126, 2.1012, 0.1872]
     speed = 0.8
     acceleration = 0.2
@@ -224,8 +227,8 @@ def move_robot_Photo2(photo_punt2, message=""):
 
 
 def move_robot_Photo3(photo_punt3, message=""):
-    photo_punt3 = [-0.445, - 0.188, 0.127]
-    orientation = [-2.89, 0.03, -0.002]
+    photo_punt3 = [-0.434, - 0.2, 0.172]
+    orientation = [-3.02, -0.04, 0.04]
     speed = 0.8
     acceleration = 0.3
     command = (
@@ -236,12 +239,12 @@ def move_robot_Photo3(photo_punt3, message=""):
     print(f"{message}: {command.strip()}")
     response = send_urscript_command(command)
     print(f"Robot antwoord: {response}")
-    time.sleep(2.5)
+    time.sleep(3.5)
 
 
 def move_robot_Photo4(photo_punt4, message=""):
-    photo_punt4 = [-0.445, 0.273, 0.127]
-    orientation = [-2.9, 0.01, 0.0039]
+    photo_punt4 = [-0.434, 0.288, 0.172]
+    orientation = [-3.02, -0.043, 0.0412]
     speed = 0.8
     acceleration = 0.3
     command = (
